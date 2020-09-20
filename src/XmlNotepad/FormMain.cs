@@ -16,22 +16,21 @@ using MyContextMenu = System.Windows.Forms.ContextMenu;
 using TopLevelMenuItemBaseType = System.Windows.Forms.MenuItem;
 using Microsoft.Win32;
 using System.Runtime.InteropServices;
-using Microsoft.Xml;
 
 namespace XmlNotepad {
     /// <summary>
     /// Summary description for Form1.
     /// </summary>
     public class FormMain : System.Windows.Forms.Form, ISite {
-
+        
         UndoManager undoManager;
         Settings settings;
         string[] args;
         DataFormats.Format urlFormat;
-        private System.Windows.Forms.StatusBar statusBar1;
+        private System.Windows.Forms.StatusBar statusBar1;       
         private System.Windows.Forms.StatusBarPanel statusBarPanelMessage;
         private System.Windows.Forms.StatusBarPanel statusBarPanelBusy;
-        RecentFilesMenu recentFiles;
+        RecentFilesMenu recentFiles;        
         TaskList taskList;
         XsltViewer dynamicHelpViewer;
         bool loading;
@@ -199,7 +198,7 @@ namespace XmlNotepad {
         private ToolStripMenuItem changeToProcessingInstructionToolStripMenuItem;
         private ToolStripSeparator toolStripMenuItem12;
         // ChangeTo Context menu...
-        private ToolStripMenuItem changeToContextMenuItem;
+        private ToolStripMenuItem changeToContextMenuItem; 
         private ToolStripMenuItem changeToAttributeContextMenuItem;
         private ToolStripMenuItem changeToTextContextMenuItem;
         private ToolStripMenuItem changeToCDATAContextMenuItem;
@@ -216,17 +215,12 @@ namespace XmlNotepad {
         private ToolStripMenuItem replaceToolStripMenuItem;
         private ToolStripMenuItem ctxAttributeBeforeToolStripMenuItem;
         private ToolStripMenuItem fileAssociationsToolStripMenuItem;
-        private ToolStripMenuItem statsToolStripMenuItem;
-        private ToolStripMenuItem checkUpdatesToolStripMenuItem;
-        private ToolStripMenuItem sampleToolStripMenuItem;
         private string redoLabel;
 
 
-        public FormMain()
-        {
-            this.settings = new Settings();
-            SetDefaultSettings();
+        public FormMain() {
 
+            this.settings = new Settings();
             this.model = (XmlCache)GetService(typeof(XmlCache));
             this.ip = (XmlIntellisenseProvider)GetService(typeof(XmlIntellisenseProvider));
             //this.model = new XmlCache((ISynchronizeInvoke)this);
@@ -245,25 +239,22 @@ namespace XmlNotepad {
 
             this.xmlTreeView1.Dock = System.Windows.Forms.DockStyle.None;
             this.xmlTreeView1.Size = this.tabPageTreeView.ClientSize;
-            this.xmlTreeView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.xmlTreeView1.Dock = System.Windows.Forms.DockStyle.Fill;            
 
             this.undoLabel = this.undoToolStripMenuItem.Text;
             this.redoLabel = this.redoToolStripMenuItem.Text;
-
+            
             this.xsltViewer.SetSite(this);
             this.dynamicHelpViewer.SetSite(this);
 
             CreateTabControl();
-
+           
             this.ResumeLayout();
-
-            this.menuStrip1.SizeChanged += OnMenuStripSizeChanged;
 
             InitializeHelp(this.helpProvider1);
 
             this.dynamicHelpViewer.DefaultStylesheetResource = "XmlNotepad.DynamicHelp.xslt";
             this.dynamicHelpViewer.ShowFileStrip = false;
-            this.dynamicHelpViewer.DisableOutputFile = true;
 
             model.FileChanged += new EventHandler(OnFileChanged);
             model.ModelChanged += new EventHandler<ModelChangedEventArgs>(OnModelChanged);
@@ -276,6 +267,51 @@ namespace XmlNotepad {
             this.resizer.Pane2 = this.tabControlLists;
             this.Controls.SetChildIndex(this.resizer, 0);
             this.taskList.Site = this;
+
+            // populate default settings and provide type info.
+            Font f = new Font("Courier New", 10, FontStyle.Regular);
+            this.Font = f;
+            this.settings["Font"] = f;
+            System.Collections.Hashtable colors = new System.Collections.Hashtable();
+            colors["Element"] = Color.FromArgb(0, 64, 128);
+            colors["Attribute"] = Color.Maroon;
+            colors["Text"] = Color.Black;
+            colors["Comment"] = Color.Green;
+            colors["PI"] = Color.Purple;
+            colors["CDATA"] = Color.Gray;
+            colors["Background"] = Color.White;
+            colors["ContainerBackground"] = Color.AliceBlue;
+
+            this.settings["Colors"] = colors;
+            this.settings["FileName"] = new Uri("/",UriKind.RelativeOrAbsolute);
+            this.settings["WindowBounds"] = new Rectangle(0,0,0,0);
+            this.settings["TaskListSize"] = 0;
+            this.settings["TreeViewSize"] = 0;
+            this.settings["RecentFiles"] = new Uri[0];
+            this.settings["SchemaCache"] = this.model.SchemaCache;
+            this.settings["SearchWindowLocation"] = new Point(0, 0);
+            this.settings["SearchSize"] = new Size(0, 0);
+            this.settings["FindMode"] = false;
+            this.settings["SearchXPath"] = false;
+            this.settings["SearchWholeWord"] = false;
+            this.settings["SearchRegex"] = false;
+            this.settings["SearchMatchCase"] = false;
+
+            this.settings["LastUpdateCheck"] = DateTime.Now;
+            this.settings["UpdateFrequency"] = TimeSpan.FromDays(20);
+            this.settings["UpdateLocation"] = "http://www.lovettsoftware.com/downloads/xmlnotepad/Updates.xml";
+            this.settings["UpdateEnabled"] = true;
+
+            this.settings["AutoFormatOnSave"] = true;
+            this.settings["IndentLevel"] = 2;
+            this.settings["IndentChar"] = IndentChar.Space;
+            this.settings["NewLineChars"] = UserSettings.Escape("\r\n");
+            this.settings["Language"] = "";
+            this.settings["NoByteOrderMark"] = false;
+
+            this.settings["AppRegistered"] = false;
+            this.settings["MaximumLineLength"] = 10000;
+            this.settings["AutoFormatLongLines"] = false;
 
             this.settings.Changed += new SettingsEventHandler(settings_Changed);
 
@@ -319,97 +355,16 @@ namespace XmlNotepad {
             this.toolStripMenuItemUpdate.Visible = false;
             this.toolStripMenuItemUpdate.Click += new EventHandler(toolStripMenuItemUpdate_Click);
 
-            this.ContextMenuStrip = this.contextMenu1;
+            // now set in virtual InitializeHelp()
+            // 
+            // helpProvider1
+            // 
+            //this.helpProvider1.HelpNamespace = Application.StartupPath + "\\Help.chm";
+            //this.helpProvider1.Site = this;
+
+            this.ContextMenuStrip = this.contextMenu1;            
             New();
 
-            this.settings["SchemaCache"] = this.model.SchemaCache;
-
-            System.Threading.Tasks.Task.Run(CheckNetwork);
-        }
-
-        private void CheckNetwork()
-        {
-            if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable())
-            {
-                System.Net.WebClient client = new System.Net.WebClient();
-                client.UseDefaultCredentials = true;
-                try
-                {
-                    string html = client.DownloadString("http://microsoft.github.io/XmlNotepad/");
-                    if (html.Contains("XML Notepad"))
-                    {
-                        this.BeginInvoke(new Action(FoundOnlineHelp));
-                    }
-                }
-                catch (Exception)
-                {
-                    // online help is not reachable
-                }
-            }
-        }
-
-        private void FoundOnlineHelp()
-        {
-            Utilities.OnlineHelpAvailable = true;
-            InitializeHelp(this.helpProvider1);
-        }
-
-        private void SetDefaultSettings()
-        {
-            // populate default settings and provide type info.
-            Font f = new Font("Courier New", 10, FontStyle.Regular);
-            this.settings["Font"] = f;
-            System.Collections.Hashtable colors = new System.Collections.Hashtable();
-            colors["Element"] = Color.FromArgb(0, 64, 128);
-            colors["Attribute"] = Color.Maroon;
-            colors["Text"] = Color.Black;
-            colors["Comment"] = Color.Green;
-            colors["PI"] = Color.Purple;
-            colors["CDATA"] = Color.Gray;
-            colors["Background"] = Color.White;
-            colors["ContainerBackground"] = Color.AliceBlue;
-
-            this.settings["Colors"] = colors;
-            this.settings["FileName"] = new Uri("/", UriKind.RelativeOrAbsolute);
-            this.settings["WindowBounds"] = new Rectangle(0, 0, 0, 0);
-            this.settings["TaskListSize"] = 0;
-            this.settings["TreeViewSize"] = 0;
-            this.settings["RecentFiles"] = new Uri[0];
-            this.settings["SearchWindowLocation"] = new Point(0, 0);
-            this.settings["SearchSize"] = new Size(0, 0);
-            this.settings["FindMode"] = false;
-            this.settings["SearchXPath"] = false;
-            this.settings["SearchWholeWord"] = false;
-            this.settings["SearchRegex"] = false;
-            this.settings["SearchMatchCase"] = false;
-
-            this.settings["LastUpdateCheck"] = DateTime.Now;
-            this.settings["UpdateFrequency"] = TimeSpan.FromDays(20);
-            this.settings["UpdateLocation"] = "http://lovettsoftware.com/downloads/xmlnotepad/Updates.xml";
-            this.settings["UpdateEnabled"] = true;
-
-            this.settings["AutoFormatOnSave"] = true;
-            this.settings["IndentLevel"] = 2;
-            this.settings["IndentChar"] = IndentChar.Space;
-            this.settings["NewLineChars"] = UserSettings.Escape("\r\n");
-            this.settings["Language"] = "";
-            this.settings["NoByteOrderMark"] = false;
-
-            this.settings["AppRegistered"] = false;
-            this.settings["MaximumLineLength"] = 10000;
-            this.settings["MaximumValueLength"] = (int)short.MaxValue;
-            this.settings["AutoFormatLongLines"] = false;
-            this.settings["IgnoreDTD"] = false;
-
-            // XmlDiff options
-            this.settings["XmlDiffIgnoreChildOrder"] = false;
-            this.settings["XmlDiffIgnoreComments"] = false;
-            this.settings["XmlDiffIgnorePI"] = false;
-            this.settings["XmlDiffIgnoreWhitespace"] = false;
-            this.settings["XmlDiffIgnoreNamespaces"] = false;
-            this.settings["XmlDiffIgnorePrefixes"] = false;
-            this.settings["XmlDiffIgnoreXmlDecl"] = false;
-            this.settings["XmlDiffIgnoreDtd"] = false;
         }
 
         public FormMain(string[] args)
@@ -473,10 +428,10 @@ namespace XmlNotepad {
             hp.SetHelpNavigator(this, HelpNavigator.TableOfContents);
             hp.Site = this;
             // in case subclass has already set HelpNamespace
-            if (string.IsNullOrEmpty(hp.HelpNamespace) || Utilities.DynamicHelpEnabled)
+            if (string.IsNullOrEmpty(hp.HelpNamespace))
             {
-                hp.HelpNamespace = Utilities.DefaultHelp;
-                Utilities.DynamicHelpEnabled = true;
+                string path = Application.StartupPath + "\\Help\\Help.htm";
+                hp.HelpNamespace = path;
             }
         }
 
@@ -596,11 +551,6 @@ namespace XmlNotepad {
             }
         }
 
-        private void OnMenuStripSizeChanged(object sender, EventArgs e)
-        {
-            Invalidate();
-        }
-
         protected override void OnLayout(LayoutEventArgs levent) {
             Size s = this.ClientSize;
             int w = s.Width;
@@ -614,7 +564,6 @@ namespace XmlNotepad {
                 this.statusBar1.Size = new Size(w, sbHeight);
             }
             this.tabControlViews.Location = new Point(0, top);
-            this.comboBoxLocation.Location = new Point(this.comboBoxLocation.Location.X, this.menuStrip1.Height);
             this.tabControlViews.Size = new Size(w, h - top - sbHeight - this.tabControlLists.Height - this.resizer.Height);
             //this.tabControlViews.Padding = new Point(0, 0);
             //this.xmlTreeView1.Location = new Point(0, top);
@@ -901,9 +850,6 @@ namespace XmlNotepad {
             this.tabPageDynamicHelp = new XmlNotepad.NoBorderTabPage();
             this.taskList = new XmlNotepad.TaskList();
             this.dynamicHelpViewer = new XmlNotepad.XsltViewer();
-            this.statsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.checkUpdatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.sampleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelMessage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.statusBarPanelBusy)).BeginInit();
             this.contextMenu1.SuspendLayout();
@@ -914,7 +860,7 @@ namespace XmlNotepad {
             this.tabPageHtmlView.SuspendLayout();
             this.SuspendLayout();
             // 
-             // statusBar1
+            // statusBar1
             // 
             resources.ApplyResources(this.statusBar1, "statusBar1");
             this.statusBar1.Name = "statusBar1";
@@ -1016,7 +962,8 @@ namespace XmlNotepad {
             this.changeToProcessingInstructionContextMenuItem});
             this.changeToContextMenuItem.Name = "changeToContextMenuItem";
             resources.ApplyResources(this.changeToContextMenuItem, "changeToContextMenuItem");
-            //  
+
+            // 
             // changeToElementContextMenuItem
             // 
             this.changeToElementContextMenuItem.Name = "changeToElementContextMenuItem";
@@ -1568,7 +1515,6 @@ namespace XmlNotepad {
             this.sourceToolStripMenuItem,
             this.optionsToolStripMenuItem,
             this.schemasToolStripMenuItem,
-            this.statsToolStripMenuItem,
             this.fileAssociationsToolStripMenuItem,
             this.toolStripMenuItem11,
             this.nextErrorToolStripMenuItem,
@@ -1844,8 +1790,6 @@ namespace XmlNotepad {
             this.helpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.contentsToolStripMenuItem,
             this.indexToolStripMenuItem,
-            this.sampleToolStripMenuItem,
-            this.checkUpdatesToolStripMenuItem,
             this.toolStripMenuItem10,
             this.aboutXMLNotepadToolStripMenuItem});
             this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
@@ -2088,25 +2032,7 @@ namespace XmlNotepad {
             this.dynamicHelpViewer.Name = "dynamicHelpViewer";
             this.dynamicHelpViewer.ShowFileStrip = true;
             this.helpProvider1.SetShowHelp(this.dynamicHelpViewer, ((bool)(resources.GetObject("dynamicHelpViewer.ShowHelp"))));
-            //
-            // checkUpdatesToolStripMenuItem
-            //
-            this.checkUpdatesToolStripMenuItem.Name = "checkUpdatesToolStripMenuItem";
-            resources.ApplyResources(this.checkUpdatesToolStripMenuItem, "checkUpdatesToolStripMenuItem");
-            this.checkUpdatesToolStripMenuItem.Click += new System.EventHandler(this.checkUpdatesToolStripMenuItem_Click);
-
-            // 
-            // statsToolStripMenuItem
-            // 
-            this.statsToolStripMenuItem.Name = "statsToolStripMenuItem";
-            resources.ApplyResources(this.statsToolStripMenuItem, "statsToolStripMenuItem");
-            this.statsToolStripMenuItem.Click += new System.EventHandler(this.statsToolStripMenuItem_Click);
-            // 
-            // sampleToolStripMenuItem
-            // 
-            this.sampleToolStripMenuItem.Name = "sampleToolStripMenuItem";
-            resources.ApplyResources(this.sampleToolStripMenuItem, "sampleToolStripMenuItem");
-            this.sampleToolStripMenuItem.Click += new System.EventHandler(this.sampleToolStripMenuItem_Click);
+           
             // 
             // FormMain
             // 
@@ -2133,11 +2059,6 @@ namespace XmlNotepad {
             this.ResumeLayout(false);
             this.PerformLayout();
 
-        }
-
-        private void checkUpdatesToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.updater.CheckNow();
         }
 
         protected virtual void TabControlViews_Selected(object sender, NoBorderTabControlEventArgs e) {
@@ -2223,7 +2144,7 @@ namespace XmlNotepad {
             get { return this.od; }
         }
 
-        public virtual void OpenDialog(string dir = null) {
+        public virtual void Open() {
             SelectTreeView();
             if (!SaveIfDirty(true))
                 return;
@@ -2234,11 +2155,7 @@ namespace XmlNotepad {
                     od.FileName = model.FileName;
                 }
             }
-            if (!string.IsNullOrEmpty(dir))
-            {
-                od.InitialDirectory = dir;
-            }
-            string filter = SR.OpenFileFilter;
+            string filter = SR.SaveAsFilter;
             od.Filter = filter;
             string[] parts = filter.Split('|');
             int index = -1;
@@ -2261,53 +2178,13 @@ namespace XmlNotepad {
         public virtual void Open(string filename) {
             try {
                 // Make sure you've called SaveIfDirty before calling this method.
-                string ext = System.IO.Path.GetExtension(filename).ToLowerInvariant();
-                if (ext == ".csv")
-                {
-                    ImportCsv(filename);
-                }
-                else
-                {
-                    InternalOpen(filename);
-                }
+                InternalOpen(filename);             
             } catch (Exception e){
                 if (MessageBox.Show(this,
                     string.Format(SR.LoadErrorPrompt, filename, e.Message),
                     SR.LoadErrorCaption, MessageBoxButtons.YesNo, MessageBoxIcon.Error) == DialogResult.Yes) {
                     OpenNotepad(filename);
                 }
-            }
-        }
-
-        private void ImportCsv(string filename)
-        {
-            FormCsvImport importForm = new XmlNotepad.FormCsvImport();
-            importForm.FileName = filename;
-            if (importForm.ShowDialog() == DialogResult.OK)
-            {
-                // then import it for real...
-                using (StreamReader reader = new StreamReader(filename))
-                {
-                    string xmlFile = Path.Combine(Path.GetDirectoryName(filename),
-                        Path.GetFileNameWithoutExtension(filename) + ".xml");
-
-                    XmlCsvReader csv = new XmlCsvReader(reader, new Uri(filename), new NameTable());
-                    csv.Delimiter = importForm.Deliminter;
-                    csv.FirstRowHasColumnNames = importForm.FirstRowIsHeader;
-
-                    includesExpanded = false;
-                    DateTime start = DateTime.Now;
-                    this.model.Load(csv, xmlFile);
-                    DateTime finish = DateTime.Now;
-                    TimeSpan diff = finish - start;
-                    string s = diff.ToString();
-                    this.settings["FileName"] = this.model.Location;
-                    this.UpdateCaption();
-                    ShowStatus(string.Format(SR.LoadedTimeStatus, s));
-                    EnableFileMenu();
-                    this.recentFiles.AddRecentFile(this.model.Location);
-                    SelectTreeView();
-                }   
             }
         }
 
@@ -2503,6 +2380,7 @@ namespace XmlNotepad {
             } else {
                 if (File.Exists(this.ConfigFile)) {
                     settings.Load(this.ConfigFile);
+
 
                     string newLines = (string)this.settings["NewLineChars"];
 
@@ -2846,7 +2724,7 @@ namespace XmlNotepad {
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e) {
             this.xmlTreeView1.CancelEdit();
-            OpenDialog();
+            Open();
         }
 
         private void reloadToolStripMenuItem_Click(object sender, EventArgs e) {
@@ -3087,7 +2965,7 @@ namespace XmlNotepad {
 
         private void toolStripButtonOpen_Click(object sender, EventArgs e) {
             this.xmlTreeView1.CancelEdit();
-            this.OpenDialog();
+            this.Open();
         }
 
         private void toolStripButtonSave_Click(object sender, EventArgs e) {
@@ -3303,15 +3181,6 @@ namespace XmlNotepad {
             }
         }
 
-        string GetEmbeddedString(string name)
-        {
-            using (Stream stream = typeof(XmlNotepad.FormMain).Assembly.GetManifestResourceStream(name))
-            {
-                StreamReader sr = new StreamReader(stream);
-                return sr.ReadToEnd();
-            }
-        }
-
         /// <summary>
         /// The html header used by XmlNotepad.
         /// </summary>
@@ -3322,22 +3191,14 @@ namespace XmlNotepad {
             string sourceXmlFile,
             string changedXmlFile,
             TextWriter resultHtml) {
-
             // this initializes the html
-            resultHtml.WriteLine("<html><head>");
-            resultHtml.WriteLine("<style TYPE='text/css'>");
-            resultHtml.WriteLine(GetEmbeddedString("XmlNotepad.Resources.XmlReportStyles.css"));
-            resultHtml.WriteLine("</style>");
-            resultHtml.WriteLine("</head>");
-            resultHtml.WriteLine(GetEmbeddedString("XmlNotepad.Resources.XmlDiffHeader.html"));
-
+            resultHtml.WriteLine(SR.XmlDiffHeader);
             resultHtml.WriteLine(string.Format(SR.XmlDiffBody,
                     System.IO.Path.GetDirectoryName(sourceXmlFile),
                     System.IO.Path.GetFileName(sourceXmlFile),
                     System.IO.Path.GetDirectoryName(changedXmlFile),
                     System.IO.Path.GetFileName(changedXmlFile)
             ));
-
         }
 
         void CleanupTempFiles() {
@@ -3351,45 +3212,6 @@ namespace XmlNotepad {
             CleanupTempFiles();
 
             // todo: add UI for setting XmlDiffOptions.
-
-            XmlDiffOptions options = XmlDiffOptions.None;
-
-            if ((bool)this.settings["XmlDiffIgnoreChildOrder"])
-            {
-                options |= XmlDiffOptions.IgnoreChildOrder;
-            }
-            if ((bool)this.settings["XmlDiffIgnoreComments"])
-            {
-                options |= XmlDiffOptions.IgnoreComments;
-            }
-            if ((bool)this.settings["XmlDiffIgnorePI"])
-            {
-                options |= XmlDiffOptions.IgnorePI;
-            }
-            if ((bool)this.settings["XmlDiffIgnoreWhitespace"])
-            {
-                options |= XmlDiffOptions.IgnoreWhitespace;
-            }
-            if ((bool)this.settings["XmlDiffIgnoreNamespaces"])
-            {
-                options |= XmlDiffOptions.IgnoreNamespaces;
-            }
-            if ((bool)this.settings["XmlDiffIgnorePrefixes"])
-            {
-                options |= XmlDiffOptions.IgnorePrefixes;
-            }
-            if ((bool)this.settings["XmlDiffIgnoreXmlDecl"])
-            {
-                options |= XmlDiffOptions.IgnoreXmlDecl;
-            }
-            if ((bool)this.settings["XmlDiffIgnoreDtd"])
-            {
-                options |= XmlDiffOptions.IgnoreDtd;
-            }
-
-            this.xmlTreeView1.Commit();
-            this.SaveIfDirty(false);
-            string filename = this.model.FileName;
 
             XmlDocument original = this.model.Document;
             XmlDocument doc = new XmlDocument();
@@ -3408,10 +3230,10 @@ namespace XmlNotepad {
             bool isEqual = false;
             XmlTextWriter diffWriter = new XmlTextWriter(diffFile, Encoding.UTF8);
             diffWriter.Formatting = Formatting.Indented;
-            using (diffWriter)
-            {
-                XmlDiff diff = new XmlDiff(options);
+            using (diffWriter) {
+                XmlDiff diff = new XmlDiff();
                 isEqual = diff.Compare(original, doc, diffWriter);
+                diff.Options = XmlDiffOptions.None;
             }
 
             if (isEqual) {
@@ -3427,21 +3249,18 @@ namespace XmlNotepad {
             
             using (XmlReader diffGram = XmlReader.Create(diffFile, settings)) {
                 XmlDiffView diffView = new XmlDiffView();
-                using (var reader = new XmlTextReader(filename))
-                { 
-                    diffView.Load(reader, diffGram);
-                    using (TextWriter htmlWriter = new StreamWriter(tempFile, false, Encoding.UTF8))
-                    {
-                        SideBySideXmlNotepadHeader(this.model.FileName, changed, htmlWriter);
-                        diffView.GetHtml(htmlWriter);
-                        htmlWriter.WriteLine("</body></html>");
-                    }
+                diffView.Load(new XmlNodeReader(original), diffGram);
+                using (TextWriter htmlWriter = new StreamWriter(tempFile, false, Encoding.UTF8)) {
+                    SideBySideXmlNotepadHeader(this.model.FileName, changed, htmlWriter);
+                    diffView.GetHtml(htmlWriter);
                 }
             }
 
-            Utilities.OpenUrl(this.Handle, tempFile);
-        }
-        
+            Uri uri = new Uri(tempFile);
+            WebBrowserForm browserForm = new WebBrowserForm(uri, "XmlDiff");
+            browserForm.Show();
+        }        
+
         string ApplicationPath {
             get {
                 string path = Application.ExecutablePath;
@@ -3636,59 +3455,7 @@ namespace XmlNotepad {
             this.xmlTreeView1.ChangeTo(XmlNodeType.Element);
         }
 
-        private void statsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.xmlTreeView1.Commit();
-            this.SaveIfDirty(false);
-            XmlStats xs = new XmlStats();
 
-            string tempFile = Path.Combine(Path.GetTempPath(),
-                Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + ".htm");
-            tempFiles.AddFile(tempFile, false);
-
-            using (TextWriter resultHtml = new StreamWriter(tempFile, false, Encoding.UTF8))
-            {
-                resultHtml.WriteLine("<html><head>");
-                resultHtml.WriteLine("<style TYPE='text/css'>");
-                resultHtml.WriteLine(GetEmbeddedString("XmlNotepad.Resources.XmlReportStyles.css"));
-                resultHtml.WriteLine("</style>");
-                resultHtml.WriteLine("</head>");
-                resultHtml.WriteLine(@"        
-    <div id='header'>        
-        <h2>XML Statistics: " + this.model.FileName + @"</h2>
-    </div>
-    <div id='main'><div class='code'><xmp>");
-
-                xs.ProcessFiles(new string[1] { this.model.FileName }, true, resultHtml, "\n");
-
-                resultHtml.WriteLine("</xmp></div></body></html>");
-            }
-
-
-            Utilities.OpenUrl(this.Handle, tempFile);
-        }
-
-        private void sampleToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            string path = typeof(XmlNotepad.FormMain).Assembly.Location;
-            string dir = System.IO.Path.GetDirectoryName(path);
-            while (!string.IsNullOrEmpty(dir))
-            {
-                string samples = System.IO.Path.Combine(dir, "Samples");
-                if (Directory.Exists(samples))
-                {
-                    OpenDialog(samples);
-                    return;
-                }
-                if (System.IO.Path.GetFileName(dir) == "xmln..tion_ab3ea86545595e2b_0002.0008_ab0a31dd50b50bdb")
-                {
-                    // don't venture outside our clickonce sandbox.
-                    break;
-                }
-                dir = System.IO.Path.GetDirectoryName(dir);
-            }
-            MessageBox.Show(this, SR.SamplesNotFound);
-        }
     }
 
 }

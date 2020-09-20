@@ -33,14 +33,20 @@ namespace XmlNotepad {
             s["UpdateLocation"] = "";
             s["UpdateEnabled"] = enabled;
             s.Changed += new SettingsEventHandler(OnSettingChanged);
-            StartTimer();
+            StartTimer(5000); // give time for process to start & load
         }
 
-        void StartTimer() { 
+        void StartTimer() {
+            if (this.updateFrequency != TimeSpan.MaxValue) {
+                StartTimer((int)this.updateFrequency.TotalMilliseconds);
+            }
+        }
+
+        void StartTimer(int interval) {
             StopTimer();
             if (this.enabled && !this.disposed) {
                 timer = new System.Windows.Forms.Timer();
-                timer.Interval = 5000;
+                timer.Interval = interval;
                 timer.Tick += new EventHandler(OnTimerTick);
                 timer.Start();
             }
@@ -94,7 +100,7 @@ namespace XmlNotepad {
             if (f != ts) {
                 settings["UpdateFrequency"] = ts;
             }
-            StartTimer();
+            StartTimer((int)ts.TotalMilliseconds);
         }
 
         void SetUpdateLocation(string location) {
@@ -115,7 +121,7 @@ namespace XmlNotepad {
                 // then this user changed the location, so we need to ping the new
                 // location right away.
                 this.lastCheck = DateTime.MinValue;
-                StartTimer();
+                StartTimer(1000);
             }
         }
         
@@ -130,15 +136,7 @@ namespace XmlNotepad {
             }
         }
 
-        bool busy;
-
-        void CheckForUpdate(object state)
-        {
-            if (busy)
-            {
-                return;
-            }
-            busy = true;
+        void CheckForUpdate(object state) {
             if (this.updateUri != null) {
                 try {
                     // assume success in this request so we don't create DOS attacks on the server!
@@ -166,7 +164,6 @@ namespace XmlNotepad {
                     this.req = null;
                 }
             }
-            busy = false;
         }
 
         void Bootstrap() {
@@ -246,15 +243,6 @@ namespace XmlNotepad {
                 }
             }            
         }
-
-        internal void CheckNow()
-        {
-            StopTimer();
-            if (this.updateUri != null)
-            {
-                ThreadPool.QueueUserWorkItem(new WaitCallback(CheckForUpdate));
-            }
-            StartTimer();
-        }
+     
     }
 }

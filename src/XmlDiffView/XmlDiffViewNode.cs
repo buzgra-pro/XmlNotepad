@@ -32,7 +32,7 @@ namespace Microsoft.XmlDiffPatch
         /// a place to store change information 
         /// (only if Operation == XmlDiffViewOperation.Change)
         /// </summary>
-        protected ChangeInfo changeInfo;
+        protected ChangeInfo changeInfo = null;
 
         /// <summary>
         /// stores the node type value
@@ -42,17 +42,12 @@ namespace Microsoft.XmlDiffPatch
         /// <summary>
         /// Pointer to the next sibiling
         /// </summary>
-        private XmlDiffViewNode nextSibilingStore;
-
-        /// <summary>
-        /// Pointer to the previous sibling or null if there isn't one.
-        /// </summary>
-        private XmlDiffViewNode previousSibilingStore;
+        private XmlDiffViewNode nextSibilingStore = null;
 
         /// <summary>
         /// Pointer to the parent node
         /// </summary>
-        private XmlDiffViewNode parentStore;
+        private XmlDiffViewNode parentStore = null;
 
         /// <summary>
         /// The type of difference
@@ -62,8 +57,7 @@ namespace Microsoft.XmlDiffPatch
         /// <summary>
         /// Identification number for the difference
         /// </summary>
-        private int operationId; // operation id
-
+        private int operationId = 0; // operation id
     
         #endregion
         
@@ -108,7 +102,7 @@ namespace Microsoft.XmlDiffPatch
         /// <summary>
         /// Gets or sets the next sibling
         /// </summary>
-        public XmlDiffViewNode NextSibling
+        public XmlDiffViewNode NextSibbling
         {
             get
             {
@@ -117,21 +111,6 @@ namespace Microsoft.XmlDiffPatch
             set
             {
                 this.nextSibilingStore = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the previous sibling
-        /// </summary>
-        public XmlDiffViewNode PreviousSibling
-        {
-            get
-            {
-                return this.previousSibilingStore;
-            }
-            set
-            {
-                this.previousSibilingStore = value;
             }
         }
 
@@ -149,17 +128,7 @@ namespace Microsoft.XmlDiffPatch
                 this.parentStore = value;
             }
         }
-
-        /// <summary>
-        /// Gets or sets the line number
-        /// </summary>
-        public int LineNumber { get; set; }
-
-        /// <summary>
-        /// Get or set the end line number for elements with children.
-        /// </summary>
-        public int EndLine { get; set; }
-
+        
         /// <summary>
         /// Gets or sets the type of node
         /// </summary>
@@ -216,9 +185,8 @@ namespace Microsoft.XmlDiffPatch
             } 
         }
 
-
         #endregion
-
+        
         #region Methods section
 
         /// <summary>
@@ -270,7 +238,7 @@ namespace Microsoft.XmlDiffPatch
             Debug.Assert(this.NodeType != XmlNodeType.Element && this.NodeType != XmlNodeType.Attribute);
             Debug.Assert(this.Operation != XmlDiffViewOperation.Change);
             XmlDiffView.HtmlStartRow(writer);
-            this.DrawLineNumber(writer);
+            this.DrawLinkNode(writer);
 
             for (int i = 0; i < 2; i++) 
             {
@@ -296,57 +264,38 @@ namespace Microsoft.XmlDiffPatch
             XmlDiffView.HtmlEndRow(writer);
         }
 
-        static int lastLineNumber;
-
-        internal static void ResetLineNumbers()
-        {
-            lastLineNumber = 0;
-        }
-
-        internal void DrawLineNumber(XmlWriter writer) {
+        internal void DrawLinkNode(XmlWriter writer) {
             writer.WriteStartElement("td");
-            writer.WriteAttributeString("class", "code");
-
-            if (this.operationId != XmlDiffView.LastVisitedOpId)
-            {
+            if (this.operationId != XmlDiffView.LastVisitedOpId) {
                 XmlDiffView.LastVisitedOpId = this.operationId;
-                // only write this anchor if the parent elemnt was not also changed or the 
-                // previous element was not changed (makes navigating changes work better).
-                if (this.operationId != 0 && 
-                    this.Parent.Operation != this.Operation &&
-                     (this.PreviousSibling == null ||
-                     this.PreviousSibling.Operation != this.Operation))
-                {
+                bool prev = false;
+                if (this.operationId != 0) {
                     writer.WriteStartElement("a");
                     writer.WriteAttributeString("name", "id" + operationId);
-                    if (lastLineNumber != this.LineNumber)
-                    {
-                        lastLineNumber = this.LineNumber;
-                        writer.WriteRaw(this.LineNumber.ToString());
+                }
+                if (this.operationId > 1) {
+                    writer.WriteStartElement("a");
+                    writer.WriteAttributeString("href", "#id" + (operationId - 1));
+                    writer.WriteString("prev");
+                    writer.WriteEndElement();
+                    prev = true;
+                }
+                if (this.operationId > 0 && this.operationId+1 < XmlDiffView.LastOperationId) {
+                    if (prev) {
+                        writer.WriteStartElement("br");
+                        writer.WriteEndElement();
                     }
-                    else
-                    {
-                        writer.WriteRaw("&#xA0;");
-                    }
+                    writer.WriteStartElement("a");
+                    writer.WriteAttributeString("href", "#id" + (operationId + 1));
+                    writer.WriteString("next");
+                    writer.WriteEndElement();
+                    writer.WriteStartElement("br");
+                    writer.WriteEndElement();
+                }
+                if (this.operationId != 0) {
                     writer.WriteEndElement();
                 }
             }
-            else
-            {
-                if (lastLineNumber != this.LineNumber)
-                {
-                    lastLineNumber = this.LineNumber;
-                    writer.WriteRaw(this.LineNumber.ToString());
-                }
-            }
-            writer.WriteEndElement();
-        }
-
-        public void DrawEndLineNumber(XmlWriter writer)
-        {
-            writer.WriteStartElement("td");
-            writer.WriteAttributeString("class", "code");
-            writer.WriteRaw(this.EndLine.ToString());
             writer.WriteEndElement();
         }
 
@@ -361,23 +310,23 @@ namespace Microsoft.XmlDiffPatch
         {
             if (this.Parent == null || this.Parent.Operation != this.Operation) 
             {
-                //switch (this.Operation) 
-                //{
-                //    case XmlDiffViewOperation.MoveFrom:
-                //        writer.WriteStartElement("a");
-                //        writer.WriteAttributeString("name", "move_from_" + this.OperationId);
-                //        writer.WriteEndElement();
-                //        writer.WriteStartElement("a");
-                //        writer.WriteAttributeString("href", "#move_to_" + this.OperationId);
-                //        return true;
-                //    case XmlDiffViewOperation.MoveTo:
-                //        writer.WriteStartElement("a");
-                //        writer.WriteAttributeString("name", "move_to_" + this.OperationId);
-                //        writer.WriteEndElement();
-                //        writer.WriteStartElement("a");
-                //        writer.WriteAttributeString("href", "#move_from_" + this.OperationId);
-                //        return true;
-                //}
+                switch (this.Operation) 
+                {
+                    case XmlDiffViewOperation.MoveFrom:
+                        writer.WriteStartElement("a");
+                        writer.WriteAttributeString("name", "move_from_" + this.OperationId);
+                        writer.WriteEndElement();
+                        writer.WriteStartElement("a");
+                        writer.WriteAttributeString("href", "#move_to_" + this.OperationId);
+                        return true;
+                    case XmlDiffViewOperation.MoveTo:
+                        writer.WriteStartElement("a");
+                        writer.WriteAttributeString("name", "move_to_" + this.OperationId);
+                        writer.WriteEndElement();
+                        writer.WriteStartElement("a");
+                        writer.WriteAttributeString("href", "#move_from_" + this.OperationId);
+                        return true;
+                }
             }
             return false;
         }

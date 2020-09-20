@@ -206,35 +206,9 @@ namespace XmlNotepad
             FireModelChanged(ModelChangeType.Reloaded, this.doc);
         }
 
-        public void Load(XmlReader reader, string fileName)
-        {
-            this.Clear();
-            loader = new DomLoader(this.site);
-            StopFileWatch();
-
-            Uri uri = new Uri(fileName, UriKind.RelativeOrAbsolute);
-            if (!uri.IsAbsoluteUri)
-            {
-                Uri resolved = new Uri(new Uri(Directory.GetCurrentDirectory() + "\\"), uri);
-                fileName = resolved.LocalPath;
-                uri = resolved;
-            }
-
-            this.filename = fileName;
-            this.lastModified = this.LastModTime;
-            this.dirty = false;
-            StartFileWatch();
-
-            this.Document = loader.Load(reader);
-            this.xsltFilename = this.loader.XsltFileName;
-
-            // calling this event will cause the XmlTreeView to populate
-            FireModelChanged(ModelChangeType.Reloaded, this.doc);
-        }
-
         internal XmlReaderSettings GetReaderSettings() {
             XmlReaderSettings settings = new XmlReaderSettings();
-            settings.DtdProcessing = GetSettingBoolean("IgnoreDTD") ? DtdProcessing.Ignore : DtdProcessing.Parse;
+            settings.ProhibitDtd = false;
             settings.CheckCharacters = false;
             settings.XmlResolver = new XmlProxyResolver(this.site);
             return settings;
@@ -244,7 +218,7 @@ namespace XmlNotepad
             if (this.Document != null) {
                 this.dirty = true;
                 XmlReaderSettings s = new XmlReaderSettings();
-                s.DtdProcessing = GetSettingBoolean("IgnoreDTD") ? DtdProcessing.Ignore : DtdProcessing.Parse;
+                s.ProhibitDtd = false;
                 s.XmlResolver = new XmlProxyResolver(this.site);
                 using (XmlReader r = XmlIncludeReader.CreateIncludeReader(this.Document, s, this.FileName)) {
                     this.Document = loader.Load(r);
@@ -321,6 +295,31 @@ namespace XmlNotepad
             return result;
         }
         
+        internal static Encoding SniffByteOrderMark(byte[] bytes, int len)
+        {
+            if (len >= 3 && bytes[0] == 0xef && bytes[1] == 0xbb && bytes[2] == 0xbf )
+            {
+                return Encoding.UTF8;
+            }
+            else if (len >= 4 && ((bytes[0] == 0x00 && bytes[1] == 0x00 && bytes[2] == 0xfe && bytes[3] == 0xff) || (bytes[0] == 0xfe && bytes[1] == 0xff && bytes[2] == 0xfe && bytes[3] == 0xff)))
+            {
+                return Encoding.GetEncoding(12001); // big endian UTF-32.
+            }
+            else if (len >= 4 && ((bytes[0] == 0xff && bytes[1] == 0xfe && bytes[2] == 0x00 && bytes[3] == 0x00) || (bytes[0] == 0xff && bytes[1] == 0xfe && bytes[2] == 0xff && bytes[3] == 0xfe) ))
+            {
+                return Encoding.UTF32; // skip UTF-32 little endian BOM
+            }
+            else if (len >= 2 && bytes[0] == 0xff && bytes[1] == 0xfe )
+            {
+                return Encoding.Unicode; // skip UTF-16 little endian BOM
+            }
+            else if (len >= 2 && bytes[0] == 0xf2 && bytes[1] == 0xff )
+            {
+                return Encoding.BigEndianUnicode; // skip UTF-16 big endian BOM
+            }
+            return null;
+        }
+
         public void AddXmlDeclarationWithEncoding()
         {
             XmlDeclaration xmldecl = doc.FirstChild as XmlDeclaration;
@@ -371,8 +370,36 @@ namespace XmlNotepad
                     }
                     ms.Seek(0, SeekOrigin.Begin);
 
-                    Utilities.WriteFileWithoutBOM(ms, name);
-                    
+                    using (FileStream fs = new FileStream(name, FileMode.Create, FileAccess.Write, FileShare.None))
+                    {
+                        byte[] bytes = new byte[16000];
+                        int len = ms.Read(bytes, 0, bytes.Length);
+
+                        int start = 0;
+                        Encoding sniff = SniffByteOrderMark(bytes, len);
+                        if (sniff != null)
+                        {
+                            if (sniff == Encoding.UTF8)
+                            {
+                                start = 3;
+                            }
+                            else if (sniff == Encoding.GetEncoding(12001) || sniff == Encoding.UTF32)  // UTF-32.
+                            {
+                                start = 4;
+                            }
+                            else if (sniff == Encoding.Unicode || sniff == Encoding.BigEndianUnicode)  // UTF-16.
+                            {
+                                start = 2;
+                            }
+                        }
+
+                        while (len > 0)
+                        {
+                            fs.Write(bytes, start, len - start);
+                            len = ms.Read(bytes, 0, bytes.Length);
+                            start = 0;
+                        }
+                    }
                 }
                 else
                 {
@@ -577,23 +604,6 @@ namespace XmlNotepad
             GC.SuppressFinalize(this);
         }
 
-        public bool GetSettingBoolean(string settingName)
-        {
-            if (this.site != null)
-            {
-                Settings settings = (Settings)this.site.GetService(typeof(Settings));
-                if (settings != null)
-                {
-                    object settingValue = settings[settingName];
-                    if (settingValue is bool)
-                    {
-                        return (bool)settingValue;
-                    }
-                }
-            }
-
-            return false;
-        }
     }
 
     public enum ModelChangeType

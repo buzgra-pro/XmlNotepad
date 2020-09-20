@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
-  <UsingTask TaskName="XmlNotepadBuildTasks.SyncWixVersion" AssemblyFile="$(SolutionDir)BuildTasks\XmlNotepadBuildTasks.dll" />
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -19,11 +18,11 @@
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <OldToolsVersion>3.5</OldToolsVersion>
     <TargetFrameworkProfile />
     <IsWebBootstrapper>true</IsWebBootstrapper>
-    <PublishUrl>ftp://www.lovettsoftware.com/LovettSoftware.com/Downloads/XmlNotepad/</PublishUrl>
+    <PublishUrl>ftp://www.lovettsoftware.com/LovettSoftware/Downloads/XmlNotepad/</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Web</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -33,15 +32,13 @@
     <UpdatePeriodically>true</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <InstallUrl>http://lovettsoftware.com/downloads/xmlnotepad/</InstallUrl>
-    <SupportUrl>https://github.com/Microsoft/XmlNotepad</SupportUrl>
+    <InstallUrl>http://www.lovettsoftware.com/downloads/xmlnotepad/</InstallUrl>
+    <SupportUrl>http://xmlnotepad.codeplex.com</SupportUrl>
     <ProductName>XML Notepad</ProductName>
     <PublisherName>Chris Lovett</PublisherName>
-    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
-    <WebPage>publish.htm</WebPage>
     <DisallowUrlActivation>true</DisallowUrlActivation>
-    <ApplicationRevision>11</ApplicationRevision>
-    <ApplicationVersion>2.8.0.%2a</ApplicationVersion>
+    <ApplicationRevision>6</ApplicationRevision>
+    <ApplicationVersion>2.7.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -54,7 +51,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -63,16 +59,15 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>AFFF93C9E6AD77B2519D1778A820B789F9F1E31D</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>235CA38984188F94FC230E1DAED8482975D38CFF</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestTimestampUrl>http://timestamp.comodoca.com?td=sha256</ManifestTimestampUrl>
+    <ManifestTimestampUrl>http://timestamp.comodoca.com/authenticode</ManifestTimestampUrl>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -118,14 +113,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Content Include="Samples\basket.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\Employee.xsd">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XmlNotepad\XmlNotepad.csproj">
@@ -219,29 +206,11 @@
     <Content Include="Help\Validation.htm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Samples\basket.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\Employee.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\Hamlet.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\rss.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\rsspretty.xsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Samples\willy.xsl">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
-    <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4.5.2 %28x86 and x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -260,90 +229,8 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <PublishFile Include="Samples\basket.xml">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\basket.xsd">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\Employee.xml">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\Employee.xsd">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\Hamlet.xml">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\rss.xml">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\rsspretty.xsl">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-    <PublishFile Include="Samples\willy.xsl">
-      <Visible>False</Visible>
-      <Group>
-      </Group>
-      <TargetPath>
-      </TargetPath>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
-      <FileType>File</FileType>
-    </PublishFile>
-  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
@@ -351,15 +238,10 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>"$(SolutionDir)PublishDrop.cmd" "$(TargetDir)" &gt; "$(SolutionDir)Publish.log"</PostBuildEvent>
+    <PostBuildEvent>"$(SolutionDir)PublishDrop.cmd" "$(TargetDir)" &gt; "$(SolutionDir)Publish.log"
+</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>copy "$(SolutionDir)\FontBuilder\bin\$(Configuration)\FontBuilder.dll" "$(TargetDir)FontBuilder.dll"</PreBuildEvent>
-  </PropertyGroup>
-  <Target Name="SyncVersionTarget">
-    <SyncWixVersion VersionFile="$(SolutionDir)Version\Version.cs" WixFile="$(SolutionDir)XmlNotepadSetup\Product.wxs" HelpFile="$(ProjectDir)Help\Help.htm" UpdatesFile="$(SolutionDir)Updates\Updates.xml" ReadmeFile="$(SolutionDir)Updates\Readme.htm" />
-  </Target>
-  <PropertyGroup>
-    <PreBuildEventDependsOn>$(PreBuildEventDependsOn);SyncVersionTarget</PreBuildEventDependsOn>
   </PropertyGroup>
 </Project>

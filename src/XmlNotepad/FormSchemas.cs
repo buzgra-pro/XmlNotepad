@@ -38,11 +38,10 @@ namespace XmlNotepad {
 
         protected override void OnLoad(EventArgs e) {            
             HelpProvider hp = this.Site.GetService(typeof(HelpProvider)) as HelpProvider;
-            if (hp != null && Utilities.DynamicHelpEnabled)
-            {
-                hp.HelpNamespace = Utilities.SchemaHelp;
+            if (hp != null) {
+                hp.SetHelpKeyword(this, "Schemas");
+                hp.SetHelpNavigator(this, HelpNavigator.KeywordIndex);
             }
-
             UpdateMenuState();
             LoadSchemas();
             this.dataGridView1.CellValueChanged += new DataGridViewCellEventHandler(dataGridView1_CellValueChanged);
@@ -111,12 +110,6 @@ namespace XmlNotepad {
         protected override void OnClosing(CancelEventArgs e) {
             if (!Cancel())
                 e.Cancel = true;
-
-            HelpProvider hp = this.Site.GetService(typeof(HelpProvider)) as HelpProvider;
-            if (hp != null && Utilities.DynamicHelpEnabled)
-            {
-                hp.HelpNamespace = Utilities.DefaultHelp;
-            }
         }
 
         public bool Cancel() {

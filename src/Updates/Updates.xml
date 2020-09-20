@@ -7,41 +7,6 @@
     <download>http://www.lovettsoftware.com/downloads/xmlnotepad/readme.htm</download>
     <frequency>1.00:00:00</frequency>
   </application>
-  <version number="2.8.0.10">
-    <bug>Fix F1 help.</bug>
-  </version>
-  <version number="2.8.0.9">
-    <bug>Fix locked file bug after doing xml comparison (github issue# 44).</bug>
-    <bug>Fix BOM option so it is honored on XSLT output files also (github issue# 46).</bug>
-  </version>
-  <version number="2.8.0.7">
-    <bug>Fix problem with TLS 1.2 by upgrading to .NET Framework 4.7.2</bug>
-  </version>
-  <version number="2.8.0.0">
-    <feature>Merge fixes from shadolight and add options that control how XmlDiff behaves.</feature>
-  </version>
-  <version number="2.7.1.21">
-    <feature>Merge change by Vincent Lepape which adds a new MaximumValueLength setting.</feature>
-  </version>
-  <version number="2.7.1.18">
-    <bug>Fix some layout bugs that happen when system font size is increased beyond 100%.</bug>
-  </version>
-  <version number="2.7.1.17">
-    <feature>Add output file field to XSL Output tab which fixes problems with relative links in the XSLT output.</feature>
-  </version>
-  <version number="2.7.1.16">
-    <bug>Thanks to Steve Romanow for fixing some old codeplex URL references.</bug>
-  </version>
-  <version number="2.7.1.12">
-    <feature>Add XML stats under View menu.</feature>
-  </version>
-  <version number="2.7.1.8">
-    <feature>Add line numbers on the XML diff output.</feature>
-    <bug>Fix navigation of differences</bug>
-  </version>
-  <version number="2.7.1.6">
-    <feature>Add ability to import *.csv files.</feature>
-  </version>
   <version number="2.7.1">
     <feature>Add new option to allow you to save XML files without the UTF-8 byte order mark.</feature>
     <feature>Add SHA 256 digital signature for stronger security.</feature>

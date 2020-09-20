@@ -109,7 +109,7 @@ namespace Microsoft.XmlDiffPatch
                 XmlDiffViewOperation valueOp = (this.InnerText == ChangeInformation.Subset) ? XmlDiffViewOperation.Match : XmlDiffViewOperation.Change;
 
                 XmlDiffView.HtmlStartRow(writer);
-                this.DrawLineNumber(writer);
+                this.DrawLinkNode(writer);
 
                 XmlDiffView.HtmlStartCell(writer, indent);
 

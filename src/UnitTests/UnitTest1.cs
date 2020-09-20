@@ -63,7 +63,7 @@ namespace UnitTests {
         }
 
         Window LaunchNotepad(string filename) {
-            this.window = LaunchApp(Directory.GetCurrentDirectory() + @"\..\..\..\drop\XmlNotepad.exe", "\"" + filename + "\"", "FormMain");
+            this.window = LaunchApp(Directory.GetCurrentDirectory() + @"\..\..\..\drop\XmlNotepad.exe", filename, "FormMain");
             return window;
         }
 
@@ -363,13 +363,8 @@ namespace UnitTests {
         /// </summary>
         void CheckNodeValue(string expected, StringComparison comparison)
         {
-            if (!Window.GetForegroundWindowText().StartsWith("XML Notepad"))
-            {
-                this.window.Activate(); 
-                Sleep(500);
-            }
             // must not be a leaf node then...
-            Sleep(300);
+            Sleep(100);
             SendKeys.SendWait("{ENTER}");
             Sleep(300);
             SendKeys.SendWait("^c");
@@ -463,7 +458,7 @@ namespace UnitTests {
             Sleep(500);
             w.SendKeystrokes("{ENTER}"); // activate drop down.
             Rectangle bounds = GetXmlBuilderBounds();
-            Window popup = ClickXmlBuilder();            
+            Window popup = ClickXmlBuilder();
             popup.SendKeystrokes("{DOWN}{LEFT} {ENTER}");
 
             Trace.WriteLine("test MouseDown on NodeTextView editor");
@@ -518,23 +513,14 @@ namespace UnitTests {
             Trace.WriteLine("Test edit of PI name");
             w.InvokeMenuItem("PIAfterToolStripMenuItem");
             Sleep(200);
-            w.SendKeystrokes("test{ENTER}");
-            Sleep(100);
-            w.SendKeystrokes("{ENTER}");
+            w.SendKeystrokes("test{ENTER}{ESC}{LEFT}");
             Sleep(200);
-            w.SendKeystrokes("{LEFT}");
-            Sleep(200);
-            w.SendKeystrokes("{ENTER}pi");
-            Sleep(200);
-            // bugbug: app is sometimes receiging the ENTER before the end of the text "pi"
-            // which seems like a regression in windows accessibility if you ask me.
-            w.SendKeystrokes("{ENTER}");
+            w.SendKeystrokes("{ENTER}pi{ENTER}");
             Sleep(200);
             UndoRedo();
 
             Trace.WriteLine("Test validation error and elementBefore command!");
             w.InvokeMenuItem("elementBeforeToolStripMenuItem");
-            Sleep(100);
             w.SendKeystrokes("woops{ENTER}");
             Sleep(500);//just so I can see it
 
@@ -545,7 +531,6 @@ namespace UnitTests {
             Sleep(1000);
             Trace.WriteLine("Navigate to next error");
             NavigateNextError();
-            Sleep(100);
             CheckNodeName("woops");
             Trace.WriteLine("Move to Basket element"); 
             w.SendKeystrokes("{LEFT}"); 
@@ -625,7 +610,7 @@ namespace UnitTests {
             Rectangle bounds = NodeTextViewCompletionSet.Bounds;
             Sleep(1000);
             Mouse.MouseClick(new Point(bounds.Left + 15, bounds.Top + 10), MouseButtons.Left);
-            return this.window.WaitForPopup(NodeTextViewCompletionSet.Hwnd);
+            return this.window.WaitForPopup();
         }
 
 
@@ -649,8 +634,9 @@ namespace UnitTests {
 
             openDialog = w.WaitForPopup();            
             openDialog.SendKeystrokes(TestDir + "UnitTests\\test5.xml{ENTER}");
-            Window browser = w.WaitForPopup(openDialog.Handle);
+            Window browser = openDialog.WaitForPopup();
             text = browser.GetWindowText();
+            Assert.AreEqual<string>(text, "XmlDiff");
             browser.DismissPopUp("%{F4}");
 
             Undo();
@@ -1249,8 +1235,8 @@ namespace UnitTests {
             Rectangle bounds = comboBoxLocation.Bounds;
             Mouse.MouseClick(bounds.Center(), MouseButtons.Left);
 
-            Trace.WriteLine("Load RSS from disk");
-            w.SendKeystrokes("{END}+{HOME}" + TestDir + "Samples\\rss.xml" + "{ENTER}");
+            Trace.WriteLine("Load RSS from http");
+            w.SendKeystrokes("{END}+{HOME}http://www.bing.com/news?format=RSS{ENTER}");
 
             Trace.WriteLine("Wait for rss to be loaded");
             WaitForText("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
@@ -1259,10 +1245,10 @@ namespace UnitTests {
             //this.CheckOuterXml("<?xml-stylesheet type='text/xsl' href='rsspretty.xsl' version='1.0'?>");
 
             Trace.WriteLine("Show XSLT");
-            AutomationWrapper tabControl = w.FindDescendant("tabControlViews");
-            bounds = tabControl.Bounds;
+            AutomationWrapper tab = w.FindDescendant("tabPageHtmlView");
+            bounds = tab.Bounds;
             Trace.WriteLine("Select tabPageHtmlView ");
-            Mouse.MouseClick(new Point(bounds.Left + 20 + 70, bounds.Top + 5), MouseButtons.Left);
+            Mouse.MouseClick(new Point(bounds.Left + 20 + 70, bounds.Top - 15), MouseButtons.Left);
             Sleep(1000);
 
             Trace.WriteLine("Enter custom XSL with script code.");
@@ -1288,7 +1274,8 @@ namespace UnitTests {
 Prefix 'user' is not defined. ");
 
             Trace.WriteLine("Back to tree view");
-            Mouse.MouseClick(new Point(bounds.Left + 20, bounds.Top + 5), MouseButtons.Left);
+            tab = w.FindDescendant("tabPageTreeView");
+            Mouse.MouseClick(new Point(bounds.Left + 20, bounds.Top - 15), MouseButtons.Left);
 
             Sleep(1000);
             Save("out.xml");
@@ -1854,12 +1841,12 @@ Prefix 'user' is not defined. ");
             Mouse.MouseUp(titleBar, MouseButtons.Left);            
 
             // code coverage on expand/collapse.
-            w.SendKeystrokes("^ICountry");
+            w.SendKeystrokes("^IOffice");
             node.Invoke();
             Sleep(500);
-            w.SendKeystrokes("{RIGHT}");
-            Sleep(500);
             w.SendKeystrokes("{LEFT}");
+            Sleep(500);
+            w.SendKeystrokes("{RIGHT}");
 
             Sleep(1000);
             Trace.WriteLine("Test task list resizers");
@@ -1921,7 +1908,62 @@ Prefix 'user' is not defined. ");
             Sleep(1000);
             source = acc.Bounds;
             return new Point((target.Left + source.Left) / 2, (target.Top + target.Bottom) / 2);
-        }        
+        }
+
+        [TestMethod]
+        public void TestInternetExplorerDragDrop() {
+            Trace.WriteLine("TestInternetExplorerDragDrop==========================================================");
+
+            Window w = this.LaunchNotepad();
+
+            Trace.WriteLine("Launching IE");
+
+            using (Window ieWindow = LaunchIE("http://www.bing.com/news?format=RSS"))
+            {
+                Sleep(5000); // give it plenty of time to settle down!.
+                Screen screen = Screen.FromHandle(ieWindow.Handle);
+                ieWindow.SetWindowSize(screen.Bounds.Width / 2, (int)(screen.Bounds.Height * 0.8));
+
+                AutomationWrapper ieframe = ieWindow.AccessibleObject;
+                AutomationWrapper pane = ieframe.GetChild(1);
+                AutomationWrapper addressBar = pane.FindChild("Address Bar");
+                AutomationWrapper combo = addressBar.FindChild("Address Combo Control");
+                AutomationWrapper dragsite = combo.FindChild("Drag to taskbar to pin site");
+
+                Rectangle treeBounds = this.TreeView.Bounds;
+                Point dropPoint = GetDropSpot(ieWindow, treeBounds);
+                Sleep(500);
+                Rectangle bounds = dragsite.Bounds;
+                Point dragPoint = new Point(bounds.Left + 10, bounds.Top + 10);
+
+                Trace.WriteLine("Dragging from: " + dragPoint.ToString());
+                Trace.WriteLine("Drop spot: " + dropPoint.ToString());
+                Sleep(500);
+                Mouse.MouseDragDrop(dragPoint, dropPoint, 10, MouseButtons.Left);
+                Sleep(500);
+
+                // get the IE window out of the way.
+                ieWindow.Close(); 
+                Sleep(1000);
+                w.Activate();
+                Sleep(1000); 
+                Trace.WriteLine("Wait for rss to be loaded");
+                this.WaitForText("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+                w.SendKeystrokes("^Irss");
+                this.CheckNodeName("rss");
+
+                string outFile = Save("out.xml");
+                Sleep(1000);
+
+                XmlDocument doc = new XmlDocument();
+                doc.Load(outFile);
+                if (doc.DocumentElement.LocalName != "rss") {
+                    throw new ApplicationException("Expected rss in UnitTests\\out.xml");
+                }
+            }
+
+            return;
+        }
 
         [TestMethod]
         public void TestAccessibility() {
@@ -2291,9 +2333,8 @@ Prefix 'user' is not defined. ");
             Uri baseUri = new Uri(test);
             XmlDocument doc = new XmlDocument();
             doc.Load(test);
-
             XmlReaderSettings settings = new XmlReaderSettings();
-            settings.DtdProcessing = DtdProcessing.Parse;
+            settings.ProhibitDtd = false;
             foreach (XmlElement e in doc.SelectNodes("test/case")) {
                 Uri input = new Uri(baseUri, e.GetAttribute("input"));
                 Uri output = new Uri(baseUri, e.GetAttribute("results"));

@@ -184,7 +184,7 @@ namespace Microsoft.XmlDiffPatch
                 {
                     return curAttr;
                 }
-                curAttr = (XmlDiffViewAttribute)curAttr.NextSibling;
+                curAttr = (XmlDiffViewAttribute)curAttr.NextSibbling;
             }
             return null;
         }
@@ -201,23 +201,13 @@ namespace Microsoft.XmlDiffPatch
             Debug.Assert(newAttr != null);
             if (refAttr == null)
             {
-                // make it the head of the list.
-                newAttr.NextSibling = this.Attributes;
-                if (this.Attributes != null)
-                {
-                    this.Attributes.PreviousSibling = newAttr;
-                }
+                newAttr.NextSibbling = this.Attributes;
                 this.Attributes = newAttr;
             }
             else
             {
-                newAttr.NextSibling = refAttr.NextSibling;
-                if (refAttr.NextSibling != null)
-                {
-                    refAttr.NextSibling.PreviousSibling = newAttr;
-                }
-                newAttr.PreviousSibling = refAttr;
-                refAttr.NextSibling = newAttr;
+                newAttr.NextSibbling = refAttr.NextSibbling;
+                refAttr.NextSibbling = newAttr;
             }
             newAttr.Parent = this;
         }
@@ -246,7 +236,7 @@ namespace Microsoft.XmlDiffPatch
                     newElement.InsertAttributeAfter(newAttr, lastNewAtt);
                     lastNewAtt = newAttr;
 
-                    curAttr = (XmlDiffViewAttribute)curAttr.NextSibling;
+                    curAttr = (XmlDiffViewAttribute)curAttr.NextSibbling;
                 }
             }
 
@@ -264,7 +254,7 @@ namespace Microsoft.XmlDiffPatch
                     newElement.InsertChildAfter(newChild, lastNewChild, false);
                     lastNewChild = newChild;
 
-                    curChild = curChild.NextSibling;
+                    curChild = curChild.NextSibbling;
                 }
             }
 
@@ -281,7 +271,7 @@ namespace Microsoft.XmlDiffPatch
             XmlDiffViewOperation typeOfDifference = Operation;
             bool closeElement = false;
             XmlDiffView.HtmlStartRow(writer);
-            this.DrawLineNumber(writer);
+            this.DrawLinkNode(writer);
             
             for (int i = 0; i < 2; i++)
             {
@@ -362,8 +352,7 @@ namespace Microsoft.XmlDiffPatch
 
                 // end element
                 XmlDiffView.HtmlStartRow(writer);
-
-                this.DrawEndLineNumber(writer);
+                this.DrawLinkNode(writer);
 
                 for (int i = 0; i < 2; i++)
                 {
@@ -522,7 +511,7 @@ namespace Microsoft.XmlDiffPatch
                 return;
             }
             string attrIndent = string.Empty;
-            if (this.Attributes.NextSibling != null)
+            if (this.Attributes.NextSibbling != null)
             {
                 attrIndent = XmlDiffView.GetIndent(this.Name.Length + 2);
             }
@@ -543,28 +532,28 @@ namespace Microsoft.XmlDiffPatch
                     {
                         if (paneNo == 0)
                         {
-                            curAttr.DrawHtmlAttributeChange(
+                            this.DrawHtmlAttributeChange(
                                 writer, 
+                                curAttr, 
                                 curAttr.LocalName, 
                                 curAttr.Prefix, 
-                                curAttr.AttributeValue,
-                                this.ignorePrefixes);
+                                curAttr.AttributeValue);
                         }
                         else
                         {
-                            curAttr.DrawHtmlAttributeChange(
+                            this.DrawHtmlAttributeChange(
                                 writer, 
+                                curAttr, 
                                 curAttr.ChangeInformation.LocalName, 
                                 curAttr.ChangeInformation.Prefix,
-                                curAttr.ChangeInformation.Subset,
-                                this.ignorePrefixes);
+                                curAttr.ChangeInformation.Subset);
                         }
                     }
                     else
                     {
-                        curAttr.DrawHtmlAttribute(
+                        this.DrawHtmlAttribute(
                             writer, 
-                            this.ignorePrefixes, 
+                            curAttr, 
                             curAttr.Operation);
                     }
                 }
@@ -572,7 +561,7 @@ namespace Microsoft.XmlDiffPatch
                 {
                     XmlDiffView.HtmlWriteEmptyString(writer);
                 }
-                curAttr = (XmlDiffViewAttribute)curAttr.NextSibling;
+                curAttr = (XmlDiffViewAttribute)curAttr.NextSibbling;
                 if (curAttr != null)
                 {
                     XmlDiffView.HtmlBr(writer);
@@ -631,7 +620,7 @@ namespace Microsoft.XmlDiffPatch
                                 "Unrecognised type of difference", 
                                 "Operation");
                     }
-                    curAttr = (XmlDiffViewAttribute)curAttr.NextSibling;
+                    curAttr = (XmlDiffViewAttribute)curAttr.NextSibbling;
                 }
             }
         }
@@ -865,6 +854,53 @@ namespace Microsoft.XmlDiffPatch
         }
 
         /// <summary>
+        /// Generates output data in html for a difference due
+        /// to changing attribute data.
+        /// </summary>
+        /// <param name="writer">output stream</param>
+        /// <param name="attr">Attribute object</param>
+        /// <param name="localName">name of attribute 
+        /// (without the prefix)</param>
+        /// <param name="prefix">xml attribute prefix</param>
+        /// <param name="attributeValue">The value for the attribute.</param>
+        private void DrawHtmlAttributeChange(
+            XmlWriter writer, 
+            XmlDiffViewAttribute attr, 
+            string localName, 
+            string prefix, 
+            string attributeValue)
+        {
+            if (prefix != string.Empty)
+            {
+                XmlDiffView.HtmlWriteString(
+                    writer,
+                    this.ignorePrefixes ? XmlDiffViewOperation.Ignore : (attr.Prefix == attr.ChangeInformation.Prefix) ? XmlDiffViewOperation.Match : XmlDiffViewOperation.Change,
+                    prefix + ":");
+            }
+
+            XmlDiffView.HtmlWriteString(
+                writer,
+                (attr.LocalName == attr.ChangeInformation.LocalName) ? XmlDiffViewOperation.Match : XmlDiffViewOperation.Change,
+                this.localName);
+
+            if (attr.AttributeValue != attr.ChangeInformation.Subset)
+            {
+                XmlDiffView.HtmlWriteString(writer, "=\"");
+                XmlDiffView.HtmlWriteString(
+                    writer, 
+                    XmlDiffViewOperation.Change, 
+                    attributeValue);
+                XmlDiffView.HtmlWriteString(writer, "\"");
+            }
+            else
+            {
+                XmlDiffView.HtmlWriteString(
+                    writer, 
+                    "=\"" + attributeValue + "\"");
+            }
+        }
+
+        /// <summary>
         /// Generate text output data for a differences 
         /// due to a change, which may or may not have been 
         /// a change in the attribute.
@@ -950,6 +986,52 @@ namespace Microsoft.XmlDiffPatch
             }
         }
 
+        /// <summary>
+        /// Generate html output data for a differences 
+        /// due to a change in an attribute.
+        /// </summary>
+        /// <param name="writer">output stream</param>
+        /// <param name="attr">Attribute object</param>
+        /// <param name="typeOfDifference">type of difference</param>
+        private void DrawHtmlAttribute(
+            XmlWriter writer, 
+            XmlDiffViewAttribute attr, 
+            XmlDiffViewOperation typeOfDifference)
+        {
+            if (this.ignorePrefixes)
+            {
+                if (attr.Prefix == "xmlns" || (attr.LocalName == "xmlns" && 
+                    attr.Prefix == string.Empty))
+                {
+                    XmlDiffView.HtmlWriteString(
+                        writer, 
+                        XmlDiffViewOperation.Ignore, 
+                        attr.Name);
+                    XmlDiffView.HtmlWriteString(
+                        writer, 
+                        typeOfDifference, 
+                        "=\"" + attr.AttributeValue + "\"");
+                    return;
+                }
+                else if (attr.Prefix != string.Empty)
+                {
+                    XmlDiffView.HtmlWriteString(
+                        writer, 
+                        XmlDiffViewOperation.Ignore, 
+                        attr.Prefix + ":");
+                    XmlDiffView.HtmlWriteString(
+                        writer, 
+                        typeOfDifference, 
+                        attr.LocalName + "=\"" + attr.AttributeValue + "\"");
+                    return;
+                }
+            }
+
+            XmlDiffView.HtmlWriteString(
+                writer, 
+                typeOfDifference, 
+                attr.Name + "=\"" + attr.AttributeValue + "\"");
+        }
         
         /// <summary>
         /// Generate text output data for an unchanged attribute.

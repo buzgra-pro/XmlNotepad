@@ -85,7 +85,7 @@ namespace Microsoft.XmlDiffPatch
                 Debug.Assert(this.nameStore != ChangeInformation.LocalName);
 
                 XmlDiffView.HtmlStartRow(writer);
-                this.DrawLineNumber(writer);
+                this.DrawLinkNode(writer);
                 XmlDiffView.HtmlStartCell(writer, indent);
 
                 XmlDiffView.HtmlWriteString(writer, "&");

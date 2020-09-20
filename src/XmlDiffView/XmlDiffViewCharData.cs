@@ -143,7 +143,7 @@ namespace Microsoft.XmlDiffPatch
                 }
 
                 XmlDiffView.HtmlStartRow(writer);
-                this.DrawLineNumber(writer);
+                this.DrawLinkNode(writer);
                 XmlDiffView.HtmlStartCell(writer, indent);
                 if (openString != string.Empty)
                 {

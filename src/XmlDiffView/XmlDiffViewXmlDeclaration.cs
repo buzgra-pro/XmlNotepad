@@ -80,8 +80,10 @@ namespace Microsoft.XmlDiffPatch
         {
             if (Operation == XmlDiffViewOperation.Change)
             {
+                Debug.Assert(this.declarationValue != ChangeInformation.Subset);
+
                 XmlDiffView.HtmlStartRow(writer);
-                this.DrawLineNumber(writer);
+                this.DrawLinkNode(writer);
                 XmlDiffView.HtmlStartCell(writer, indent);
                 XmlDiffView.HtmlWriteString(writer, Tags.XmlDeclarationBegin);
                 XmlDiffView.HtmlWriteString(writer, XmlDiffViewOperation.Change, this.declarationValue);

@@ -29,6 +29,7 @@ internal abstract class XmlDiffNode
     internal ulong _hashValue = 0;
     internal bool _bExpanded;
 
+
     // 'tree-to-tree comparison' algorithm fields:
     internal int _leftmostLeafIndex;
     internal bool _bKeyRoot;

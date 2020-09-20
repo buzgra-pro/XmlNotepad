@@ -385,6 +385,34 @@ Would you like to reformat the text into multiple lines?</value>
 Do you want to enable execution of this script code?</value>
     <comment>Message box prompt</comment>
   </data>
+  <data name="XmlDiffHeader" xml:space="preserve">
+    <value>&lt;html&gt;&lt;head&gt;
+                &lt;style TYPE='text/css' MEDIA='screen'&gt;
+                &lt;!-- td { font-family: Courier New; font-size:14; } 
+                th { font-family: Arial; } 
+                p { font-family: Arial; } 
+                .match { }
+                .ignore { color:#AAAAAA; }
+                .add { background-color:yellow; }
+                .moveto { background-color:cyan; color:navy; }
+                .remove { background-color:red; }
+                .movefrom {  background-color:cyan; color:navy; }
+                .change {  background-color:lightgreen;  }
+                --&gt;
+            &lt;/style&gt;&lt;/head&gt;
+            &lt;body&gt;
+                &lt;table border='0' width='100%'&gt;
+                    &lt;tr&gt;&lt;td&gt;&lt;table border='0' width='100%' style='table-layout:fixed;'&gt;
+                    &lt;COL WIDTH='40'&gt;&lt;COL WIDTH='50%'&gt;&lt;COL WIDTH='50%'&gt;
+                    &lt;tr&gt;&lt;td colspan='3' align='center'&gt;
+                    &lt;b&gt;Legend:&lt;/b&gt; &lt;span class='add'&gt;added&lt;/span&gt;&amp;nbsp;&amp;nbsp;
+                        &lt;span class='remove'&gt;removed&lt;/span&gt;&amp;nbsp;&amp;nbsp;
+                        &lt;span class='change'&gt;changed&lt;/span&gt;&amp;nbsp;&amp;nbsp;
+                        &lt;span class='movefrom'&gt;moved from&lt;/span&gt;&amp;nbsp;&amp;nbsp;
+                        &lt;span class='moveto'&gt;moved to&lt;/span&gt;&amp;nbsp;&amp;nbsp;
+                        &lt;span class='ignore'&gt;ignored&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;
+                    &lt;/td&gt;&lt;/tr&gt;</value>
+  </data>
   <data name="EditNamespaceCommand" xml:space="preserve">
     <value>Edit Namespace</value>
     <comment>Command label</comment>
@@ -706,14 +734,6 @@ Do you want to visit the web page that describes this update?</value>
     <value>Maximum Line Length</value>
     <comment>Property Grid property name</comment>
   </data>
-  <data name="MaximumValueLengthDescription" xml:space="preserve">
-    <value>What is the maximum length for the textbox</value>
-    <comment>Property Grid description</comment>
-  </data>
-  <data name="MaximumValueLengthProperty" xml:space="preserve">
-    <value>Maximum Value Length</value>
-    <comment>Property Grid property name</comment>
-  </data>
   <data name="NoByteOrderMark" xml:space="preserve">
     <value>No byte order mark on save</value>
     <comment>Property grid property name</comment>
@@ -721,72 +741,5 @@ Do you want to visit the web page that describes this update?</value>
   <data name="NoByteOrderMarkDescription" xml:space="preserve">
     <value>Do not write any byte order mark at the beginning of the file for UTF-8 (0xef 0xbb 0xbf) or UTF-16 (0xff ffe)</value>
     <comment>Property Grid description</comment>
-  </data>
-  <data name="OpenFileFilter" xml:space="preserve">
-    <value>XML files (*.xml)|*.xml|XSL files (*.xsl)|*.xsl|XSD files (*.xsd)|*.xsd|CSV files (*.csv)|*.csv|All files (*.*)|*.*</value>
-    <comment>Open file dialog filter.</comment>
-  </data>
-  <data name="IgnoreDTDDescription" xml:space="preserve">
-    <value>Avoid DTD validations</value>
-    <comment>Property Grid Description</comment>
-  </data>
-  <data name="IgnoreDTDProperty" xml:space="preserve">
-    <value>Ignore DTD</value>
-    <comment>Property Grid Property Name</comment>
-  </data>
-  <data name="XslOutputFileNameTooltip" xml:space="preserve">
-    <value>Please enter the filename for storing the the XSLT output</value>
-    <comment>Tooltip</comment>
-  </data>
-  <data name="XmlDiffIgnoreChildOrderDescription" xml:space="preserve">
-    <value>Ignore differences in the order of child elements</value>
-  </data>
-  <data name="XmlDiffIgnoreChildOrderProperty" xml:space="preserve">
-    <value>Ignore child order</value>
-  </data>
-  <data name="XmlDiffIgnoreCommentsDescription" xml:space="preserve">
-    <value>Ignore differences in comments</value>
-  </data>
-  <data name="XmlDiffIgnoreCommentsProperty" xml:space="preserve">
-    <value>Ignore comments</value>
-  </data>
-  <data name="XmlDiffIgnoreDtdDescription" xml:space="preserve">
-    <value>Ignore differences in DTD elements</value>
-  </data>
-  <data name="XmlDiffIgnoreDtdProperty" xml:space="preserve">
-    <value>Ignore DTD</value>
-  </data>
-  <data name="XmlDiffIgnoreNamespacesDescription" xml:space="preserve">
-    <value>Ignore differences in namespaces</value>
-  </data>
-  <data name="XmlDiffIgnoreNamespacesProperty" xml:space="preserve">
-    <value>Ignore namespaces</value>
-  </data>
-  <data name="XmlDiffIgnorePIDescription" xml:space="preserve">
-    <value>Ignore differences in processing instructions</value>
-  </data>
-  <data name="XmlDiffIgnorePIProperty" xml:space="preserve">
-    <value>Ignore processing instructions</value>
-  </data>
-  <data name="XmlDiffIgnorePrefixesDescription" xml:space="preserve">
-    <value>Ignore differences in namespace prefixes</value>
-  </data>
-  <data name="XmlDiffIgnorePrefixesProperty" xml:space="preserve">
-    <value>Ignore prefixes</value>
-  </data>
-  <data name="XmlDiffIgnoreWhitespaceDescription" xml:space="preserve">
-    <value>Ignore differences in insignificant whitespace between elements</value>
-  </data>
-  <data name="XmlDiffIgnoreWhitespaceProperty" xml:space="preserve">
-    <value>Ignore whitespace</value>
-  </data>
-  <data name="XmlDiffIgnoreXmlDeclDescription" xml:space="preserve">
-    <value>Ignore differences in XML declarations</value>
-  </data>
-  <data name="XmlDiffIgnoreXmlDeclProperty" xml:space="preserve">
-    <value>Ignore XML declarations</value>
-  </data>
-  <data name="SamplesNotFound" xml:space="preserve">
-    <value>Samples folder not found</value>
   </data>
 </root>

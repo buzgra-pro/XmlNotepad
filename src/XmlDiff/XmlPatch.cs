@@ -74,14 +74,11 @@ public class XmlPatch
         // patch fragment
         if ( diffDoc.DocumentElement.GetAttribute( "fragments" ) == "yes" ) {
             NameTable nt = new NameTable();
-            using (var file = new FileStream(sourceFile, FileMode.Open, FileAccess.Read))
-            {
-                XmlTextReader tr = new XmlTextReader(file,
-                                                    XmlNodeType.Element,
-                                                    new XmlParserContext(nt, new XmlNamespaceManager(nt),
-                                                                        string.Empty, XmlSpace.Default));
-                Patch(tr, outputStream, diffDoc);
-            }
+            XmlTextReader tr = new XmlTextReader( new FileStream( sourceFile, FileMode.Open, FileAccess.Read ),
+                                                  XmlNodeType.Element,
+                                                  new XmlParserContext( nt, new XmlNamespaceManager( nt ),
+                                                                        string.Empty, XmlSpace.Default ) );
+            Patch( tr, outputStream, diffDoc ); 
         }
         // patch document
         else {
