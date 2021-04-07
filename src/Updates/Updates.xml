@@ -3,10 +3,81 @@
 <updates xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Updates.xsd">
   <application>
     <title>Microsoft XML Notepad</title>
-    <location>http://www.lovettsoftware.com/downloads/xmlnotepad/Updates.xml</location>
-    <download>http://www.lovettsoftware.com/downloads/xmlnotepad/readme.htm</download>
+    <location>https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/Updates.xml</location>
+    <download>https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/readme.htm</download>
+    <installer>https://microsoft.github.io/XmlNotepad/install/</installer>
     <frequency>1.00:00:00</frequency>
   </application>
+  <version number="2.8.0.28">
+    <feature>Thanks to Austin Wise for adding High DPI scaling which makes the fonts a lot less blurry on high DPI screens.</feature>
+  </version>
+  <version number="2.8.0.27">
+    <feature>Minor fixes to XML stats output got github issues #76 and #77.</feature>
+  </version>
+  <version number="2.8.0.26">
+    <feature>Provide a way to disable google analytics before installing XML Notepad.</feature>
+  </version>
+  <version number="2.8.0.24">
+    <feature>Check XML diff files are different files.</feature>
+  </version>
+  <version number="2.8.0.23">
+    <feature>Add ability to import HTML files and convert them to XML using SgmlReader.</feature>
+  </version>
+  <version number="2.8.0.19">
+    <feature>Add optional google analytics so we can get an idea of usage.</feature>
+  </version>
+  <version number="2.8.0.18">
+    <bug>Fix Dark Theme options editing and add new color for text editor background.</bug>
+    <bug>Fix performance bug to do with expanding too many nodes on save and on find.</bug>
+  </version>
+  <version number="2.8.0.14">
+    <feature>Fix bug in current file address combobox.  Start implementing stylecop code cleanups.</feature>
+  </version>
+  <version number="2.8.0.13">
+    <feature>Sync offline help so it matches the online help, fix some typos and add more info to options dialog help text.</feature>
+  </version>
+  <version number="2.8.0.12">
+    <feature>Add auto-completion in location combobox and increased history to 1000 filenames.</feature>
+  </version>
+  <version number="2.8.0.11">
+    <feature>Add support for "Dark" theme colors and a way to easily switch between light and dark theme.</feature>
+    <feature>Add transparent icons that look good on dark backgrounds</feature>
+  </version>
+  <version number="2.8.0.10">
+    <bug>Fix F1 help.</bug>
+  </version>
+  <version number="2.8.0.9">
+    <bug>Fix locked file bug after doing xml comparison (github issue# 44).</bug>
+    <bug>Fix BOM option so it is honored on XSLT output files also (github issue# 46).</bug>
+  </version>
+  <version number="2.8.0.7">
+    <bug>Fix problem with TLS 1.2 by upgrading to .NET Framework 4.7.2</bug>
+  </version>
+  <version number="2.8.0.0">
+    <feature>Merge fixes from shadolight and add options that control how XmlDiff behaves.</feature>
+  </version>
+  <version number="2.7.1.21">
+    <feature>Merge change by Vincent Lepape which adds a new MaximumValueLength setting.</feature>
+  </version>
+  <version number="2.7.1.18">
+    <bug>Fix some layout bugs that happen when system font size is increased beyond 100%.</bug>
+  </version>
+  <version number="2.7.1.17">
+    <feature>Add output file field to XSL Output tab which fixes problems with relative links in the XSLT output.</feature>
+  </version>
+  <version number="2.7.1.16">
+    <bug>Thanks to Steve Romanow for fixing some old codeplex URL references.</bug>
+  </version>
+  <version number="2.7.1.12">
+    <feature>Add XML stats under View menu.</feature>
+  </version>
+  <version number="2.7.1.8">
+    <feature>Add line numbers on the XML diff output.</feature>
+    <bug>Fix navigation of differences</bug>
+  </version>
+  <version number="2.7.1.6">
+    <feature>Add ability to import *.csv files.</feature>
+  </version>
   <version number="2.7.1">
     <feature>Add new option to allow you to save XML files without the UTF-8 byte order mark.</feature>
     <feature>Add SHA 256 digital signature for stronger security.</feature>

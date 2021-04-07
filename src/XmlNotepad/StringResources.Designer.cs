@@ -70,6 +70,33 @@ namespace XmlNotepad {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Allow analytics.
+        /// </summary>
+        internal static string AllowAnalytics {
+            get {
+                return ResourceManager.GetString("AllowAnalytics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow anonymous analytics to be collected.
+        /// </summary>
+        internal static string AllowAnalyticsDescription {
+            get {
+                return ResourceManager.GetString("AllowAnalyticsDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Analytics.
+        /// </summary>
+        internal static string AnalyticsCategory {
+            get {
+                return ResourceManager.GetString("AnalyticsCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A simple XML editor with XSD intellisense and XSLTpreview.
         /// </summary>
         internal static string AppDescription {
@@ -261,6 +288,24 @@ namespace XmlNotepad {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Container background.
+        /// </summary>
+        internal static string ContainerBackgroundColor {
+            get {
+                return ResourceManager.GetString("ContainerBackgroundColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The background color for non text nodes.
+        /// </summary>
+        internal static string ContainerBackgroundColorDescription {
+            get {
+                return ResourceManager.GetString("ContainerBackgroundColorDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File &apos;{0}&apos; does not exist. Do you need to create the file?.
         /// </summary>
         internal static string CreateFile {
@@ -419,6 +464,24 @@ namespace XmlNotepad {
         internal static string EditNamespaceCommand {
             get {
                 return ResourceManager.GetString("EditNamespaceCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Editor background.
+        /// </summary>
+        internal static string EditorBackgroundColor {
+            get {
+                return ResourceManager.GetString("EditorBackgroundColor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Background color for text editor control.
+        /// </summary>
+        internal static string EditorBackgroundColorDescription {
+            get {
+                return ResourceManager.GetString("EditorBackgroundColorDescription", resourceCulture);
             }
         }
         
@@ -967,7 +1030,7 @@ namespace XmlNotepad {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to XML files (*.xml)|*.xml|XSL files (*.xsl)|*.xsl|XSD files (*.xsd)|*.xsd|CSV files (*.csv)|*.csv|All files (*.*)|*.*.
+        ///   Looks up a localized string similar to XML files (*.xml)|*.xml|XSL files (*.xsl)|*.xsl|XSD files (*.xsd)|*.xsd|CSV files (*.csv)|*.csv|HTML files (*.htm;*.html)|*.htm;*.html|All files (*.*)|*.*.
         /// </summary>
         internal static string OpenFileFilter {
             get {
@@ -1211,6 +1274,24 @@ namespace XmlNotepad {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Click here to open the installer web page..
+        /// </summary>
+        internal static string ShowInstallPage {
+            get {
+                return ResourceManager.GetString("ShowInstallPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click here to visit the update history..
+        /// </summary>
+        internal static string ShowUpdateHistory {
+            get {
+                return ResourceManager.GetString("ShowUpdateHistory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to System Exception of type {0}
         ///{1}.
         /// </summary>
@@ -1244,6 +1325,33 @@ namespace XmlNotepad {
         internal static string TextNotFoundPrompt {
             get {
                 return ResourceManager.GetString("TextNotFoundPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        internal static string Theme {
+            get {
+                return ResourceManager.GetString("Theme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Color Theme.
+        /// </summary>
+        internal static string ThemeCategory {
+            get {
+                return ResourceManager.GetString("ThemeCategory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Select the default color theme and theme to edit.
+        /// </summary>
+        internal static string ThemeDescription {
+            get {
+                return ResourceManager.GetString("ThemeDescription", resourceCulture);
             }
         }
         
@@ -1320,21 +1428,20 @@ namespace XmlNotepad {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Version {1} of {0} is now available.  
-        ///Do you want to visit the web page that describes this update?.
-        /// </summary>
-        internal static string UpdateAvailable {
-            get {
-                return ResourceManager.GetString("UpdateAvailable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Update Available.
         /// </summary>
         internal static string UpdateAvailableCaption {
             get {
                 return ResourceManager.GetString("UpdateAvailableCaption", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version {1} of {0} is now available. .
+        /// </summary>
+        internal static string UpdateAvailableTooltip {
+            get {
+                return ResourceManager.GetString("UpdateAvailableTooltip", resourceCulture);
             }
         }
         
@@ -1366,6 +1473,24 @@ namespace XmlNotepad {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Up to date.
+        /// </summary>
+        internal static string UpToDate {
+            get {
+                return ResourceManager.GetString("UpToDate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You have the latest version: {0}.
+        /// </summary>
+        internal static string UpToDateTooltip {
+            get {
+                return ResourceManager.GetString("UpToDateTooltip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &amp;Browse....
         /// </summary>
         internal static string UriBrowseLabel {
@@ -1376,12 +1501,21 @@ namespace XmlNotepad {
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td title=&apos;{0}&apos;&gt;&lt;b&gt; File in editor : {1}&lt;/b&gt;&lt;/td&gt;
-        ///  &lt;td title=&apos;{2}&apos;&gt;&lt;b&gt; File to compare : {2}&lt;/b&gt;&lt;/td&gt;
+        ///  &lt;td title=&apos;{2}&apos;&gt;&lt;b&gt; File to compare : {3}&lt;/b&gt;&lt;/td&gt;
         ///&lt;/tr&gt;.
         /// </summary>
         internal static string XmlDiffBody {
             get {
                 return ResourceManager.GetString("XmlDiffBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There is no file loaded to diff against..
+        /// </summary>
+        internal static string XmlDiffEmptyPrompt {
+            get {
+                return ResourceManager.GetString("XmlDiffEmptyPrompt", resourceCulture);
             }
         }
         
@@ -1539,6 +1673,15 @@ namespace XmlNotepad {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You selected the same file, please select a different file..
+        /// </summary>
+        internal static string XmlDiffSameFilePrompt {
+            get {
+                return ResourceManager.GetString("XmlDiffSameFilePrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You must provide a non-empty name, are you sure you want to leave this name empty?.
         /// </summary>
         internal static string XmlNameEmptyPrompt {
@@ -1553,16 +1696,6 @@ namespace XmlNotepad {
         internal static string XmlNameErrorCaption {
             get {
                 return ResourceManager.GetString("XmlNameErrorCaption", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] XmlNotepadRegistration {
-            get {
-                object obj = ResourceManager.GetObject("XmlNotepadRegistration", resourceCulture);
-                return ((byte[])(obj));
             }
         }
         

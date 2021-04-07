@@ -385,34 +385,6 @@ Would you like to reformat the text into multiple lines?</value>
 Do you want to enable execution of this script code?</value>
     <comment>Message box prompt</comment>
   </data>
-  <data name="XmlDiffHeader" xml:space="preserve">
-    <value>&lt;html&gt;&lt;head&gt;
-                &lt;style TYPE='text/css' MEDIA='screen'&gt;
-                &lt;!-- td { font-family: Courier New; font-size:14; } 
-                th { font-family: Arial; } 
-                p { font-family: Arial; } 
-                .match { }
-                .ignore { color:#AAAAAA; }
-                .add { background-color:yellow; }
-                .moveto { background-color:cyan; color:navy; }
-                .remove { background-color:red; }
-                .movefrom {  background-color:cyan; color:navy; }
-                .change {  background-color:lightgreen;  }
-                --&gt;
-            &lt;/style&gt;&lt;/head&gt;
-            &lt;body&gt;
-                &lt;table border='0' width='100%'&gt;
-                    &lt;tr&gt;&lt;td&gt;&lt;table border='0' width='100%' style='table-layout:fixed;'&gt;
-                    &lt;COL WIDTH='40'&gt;&lt;COL WIDTH='50%'&gt;&lt;COL WIDTH='50%'&gt;
-                    &lt;tr&gt;&lt;td colspan='3' align='center'&gt;
-                    &lt;b&gt;Legend:&lt;/b&gt; &lt;span class='add'&gt;added&lt;/span&gt;&amp;nbsp;&amp;nbsp;
-                        &lt;span class='remove'&gt;removed&lt;/span&gt;&amp;nbsp;&amp;nbsp;
-                        &lt;span class='change'&gt;changed&lt;/span&gt;&amp;nbsp;&amp;nbsp;
-                        &lt;span class='movefrom'&gt;moved from&lt;/span&gt;&amp;nbsp;&amp;nbsp;
-                        &lt;span class='moveto'&gt;moved to&lt;/span&gt;&amp;nbsp;&amp;nbsp;
-                        &lt;span class='ignore'&gt;ignored&lt;/span&gt;&lt;br/&gt;&lt;br/&gt;
-                    &lt;/td&gt;&lt;/tr&gt;</value>
-  </data>
   <data name="EditNamespaceCommand" xml:space="preserve">
     <value>Edit Namespace</value>
     <comment>Command label</comment>
@@ -479,7 +451,7 @@ Do you want to enable execution of this script code?</value>
   </data>
   <data name="XmlDiffBody" xml:space="preserve">
     <value>&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td title='{0}'&gt;&lt;b&gt; File in editor : {1}&lt;/b&gt;&lt;/td&gt;
-  &lt;td title='{2}'&gt;&lt;b&gt; File to compare : {2}&lt;/b&gt;&lt;/td&gt;
+  &lt;td title='{2}'&gt;&lt;b&gt; File to compare : {3}&lt;/b&gt;&lt;/td&gt;
 &lt;/tr&gt;</value>
   </data>
   <data name="IncludeHRefRequired" xml:space="preserve">
@@ -526,9 +498,8 @@ Do you want to enable execution of this script code?</value>
     <value>Update Available</value>
     <comment>Message box caption</comment>
   </data>
-  <data name="UpdateAvailable" xml:space="preserve">
-    <value>Version {1} of {0} is now available.  
-Do you want to visit the web page that describes this update?</value>
+  <data name="UpdateAvailableTooltip" xml:space="preserve">
+    <value>Version {1} of {0} is now available. </value>
     <comment>Message box prompt</comment>
   </data>
   <data name="ChangeErrorCaption" xml:space="preserve">
@@ -617,6 +588,18 @@ Do you want to visit the web page that describes this update?</value>
   </data>
   <data name="EnableUpdateDescription" xml:space="preserve">
     <value>Whether to check for updates periodically</value>
+    <comment>Property Grid description</comment>
+  </data>
+  <data name="AnalyticsCategory" xml:space="preserve">
+    <value>Analytics</value>
+    <comment>Property Grid category</comment>
+  </data>
+  <data name="AllowAnalytics" xml:space="preserve">
+    <value>Allow analytics</value>
+    <comment>Property Grid property name</comment>
+  </data>
+  <data name="AllowAnalyticsDescription" xml:space="preserve">
+    <value>Allow anonymous analytics to be collected</value>
     <comment>Property Grid description</comment>
   </data>
   <data name="FontPropertyName" xml:space="preserve">
@@ -710,10 +693,6 @@ Do you want to visit the web page that describes this update?</value>
   <data name="AppProgId" xml:space="preserve">
     <value>XmlNotepad</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="XmlNotepadRegistration" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\XmlNotepadRegistration\bin\XmlNotepadRegistration.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="AutoFormatLongLinesDescriptions" xml:space="preserve">
     <value>Autoformat long lines instead of prompting</value>
     <comment>Property Grid description</comment>
@@ -734,6 +713,14 @@ Do you want to visit the web page that describes this update?</value>
     <value>Maximum Line Length</value>
     <comment>Property Grid property name</comment>
   </data>
+  <data name="MaximumValueLengthDescription" xml:space="preserve">
+    <value>What is the maximum length for the textbox</value>
+    <comment>Property Grid description</comment>
+  </data>
+  <data name="MaximumValueLengthProperty" xml:space="preserve">
+    <value>Maximum Value Length</value>
+    <comment>Property Grid property name</comment>
+  </data>
   <data name="NoByteOrderMark" xml:space="preserve">
     <value>No byte order mark on save</value>
     <comment>Property grid property name</comment>
@@ -741,5 +728,121 @@ Do you want to visit the web page that describes this update?</value>
   <data name="NoByteOrderMarkDescription" xml:space="preserve">
     <value>Do not write any byte order mark at the beginning of the file for UTF-8 (0xef 0xbb 0xbf) or UTF-16 (0xff ffe)</value>
     <comment>Property Grid description</comment>
+  </data>
+  <data name="OpenFileFilter" xml:space="preserve">
+    <value>XML files (*.xml)|*.xml|XSL files (*.xsl)|*.xsl|XSD files (*.xsd)|*.xsd|CSV files (*.csv)|*.csv|HTML files (*.htm;*.html)|*.htm;*.html|All files (*.*)|*.*</value>
+    <comment>Open file dialog filter.</comment>
+  </data>
+  <data name="IgnoreDTDDescription" xml:space="preserve">
+    <value>Avoid DTD validations</value>
+    <comment>Property Grid Description</comment>
+  </data>
+  <data name="IgnoreDTDProperty" xml:space="preserve">
+    <value>Ignore DTD</value>
+    <comment>Property Grid Property Name</comment>
+  </data>
+  <data name="XslOutputFileNameTooltip" xml:space="preserve">
+    <value>Please enter the filename for storing the the XSLT output</value>
+    <comment>Tooltip</comment>
+  </data>
+  <data name="XmlDiffIgnoreChildOrderDescription" xml:space="preserve">
+    <value>Ignore differences in the order of child elements</value>
+  </data>
+  <data name="XmlDiffIgnoreChildOrderProperty" xml:space="preserve">
+    <value>Ignore child order</value>
+  </data>
+  <data name="XmlDiffIgnoreCommentsDescription" xml:space="preserve">
+    <value>Ignore differences in comments</value>
+  </data>
+  <data name="XmlDiffIgnoreCommentsProperty" xml:space="preserve">
+    <value>Ignore comments</value>
+  </data>
+  <data name="XmlDiffIgnoreDtdDescription" xml:space="preserve">
+    <value>Ignore differences in DTD elements</value>
+  </data>
+  <data name="XmlDiffIgnoreDtdProperty" xml:space="preserve">
+    <value>Ignore DTD</value>
+  </data>
+  <data name="XmlDiffIgnoreNamespacesDescription" xml:space="preserve">
+    <value>Ignore differences in namespaces</value>
+  </data>
+  <data name="XmlDiffIgnoreNamespacesProperty" xml:space="preserve">
+    <value>Ignore namespaces</value>
+  </data>
+  <data name="XmlDiffIgnorePIDescription" xml:space="preserve">
+    <value>Ignore differences in processing instructions</value>
+  </data>
+  <data name="XmlDiffIgnorePIProperty" xml:space="preserve">
+    <value>Ignore processing instructions</value>
+  </data>
+  <data name="XmlDiffIgnorePrefixesDescription" xml:space="preserve">
+    <value>Ignore differences in namespace prefixes</value>
+  </data>
+  <data name="XmlDiffIgnorePrefixesProperty" xml:space="preserve">
+    <value>Ignore prefixes</value>
+  </data>
+  <data name="XmlDiffIgnoreWhitespaceDescription" xml:space="preserve">
+    <value>Ignore differences in insignificant whitespace between elements</value>
+  </data>
+  <data name="XmlDiffIgnoreWhitespaceProperty" xml:space="preserve">
+    <value>Ignore whitespace</value>
+  </data>
+  <data name="XmlDiffIgnoreXmlDeclDescription" xml:space="preserve">
+    <value>Ignore differences in XML declarations</value>
+  </data>
+  <data name="XmlDiffIgnoreXmlDeclProperty" xml:space="preserve">
+    <value>Ignore XML declarations</value>
+  </data>
+  <data name="SamplesNotFound" xml:space="preserve">
+    <value>Samples folder not found</value>
+  </data>
+  <data name="Theme" xml:space="preserve">
+    <value>Name</value>
+    <comment>Property Name</comment>
+  </data>
+  <data name="ThemeCategory" xml:space="preserve">
+    <value>Color Theme</value>
+    <comment>Property Window Category</comment>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Select the default color theme and theme to edit</value>
+    <comment>Property Description</comment>
+  </data>
+  <data name="ContainerBackgroundColor" xml:space="preserve">
+    <value>Container background</value>
+    <comment>Property Name</comment>
+  </data>
+  <data name="ContainerBackgroundColorDescription" xml:space="preserve">
+    <value>The background color for non text nodes</value>
+    <comment>Property description</comment>
+  </data>
+  <data name="EditorBackgroundColor" xml:space="preserve">
+    <value>Editor background</value>
+    <comment>Property Name</comment>
+  </data>
+  <data name="EditorBackgroundColorDescription" xml:space="preserve">
+    <value>Background color for text editor control</value>
+    <comment>Property Description</comment>
+  </data>
+  <data name="XmlDiffEmptyPrompt" xml:space="preserve">
+    <value>There is no file loaded to diff against.</value>
+    <comment>Message box prompt</comment>
+  </data>
+  <data name="XmlDiffSameFilePrompt" xml:space="preserve">
+    <value>You selected the same file, please select a different file.</value>
+    <comment>Message box prompt</comment>
+  </data>
+  <data name="ShowInstallPage" xml:space="preserve">
+    <value>Click here to open the installer web page.</value>
+  </data>
+  <data name="ShowUpdateHistory" xml:space="preserve">
+    <value>Click here to visit the update history.</value>
+  </data>
+  <data name="UpToDate" xml:space="preserve">
+    <value>Up to date</value>
+    <comment>Button caption.</comment>
+  </data>
+  <data name="UpToDateTooltip" xml:space="preserve">
+    <value>You have the latest version: {0}</value>
   </data>
 </root>

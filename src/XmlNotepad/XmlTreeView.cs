@@ -205,22 +205,49 @@ namespace XmlNotepad
             return new XmlTreeNode(this, parent, node);
         }
 
+        /// <summary>
+        /// Find the given node in the tree by expanding the minimum amount of stuff to get there.
+        /// </summary>
+        /// <param name="node">The XmlNode to find</param>
+        /// <returns>The XmlTreeNode representing this XmlNode or null if the XmlNode is disconnected from the current document.</returns>
         public XmlTreeNode FindNode(XmlNode node)
         {
-            return FindNode(this.myTreeView.Nodes, node);
+            if (node is XmlDocument)
+            {
+                // there is no XmlTreeNode for the document.
+                return null;
+            }
+
+            if (node == null || node.ParentNode == null)
+            {
+                // then we have a node that is disconnected
+                return null;
+            }
+
+            if (node.OwnerDocument != this.model.Document)
+            {
+                return null;
+            }
+
+            XmlTreeNode parent = FindNode(node.ParentNode);
+            if (parent == null) 
+            {
+                // then the node is a root node.
+                return FindChild(this.myTreeView.Nodes, node);
+            }
+            else
+            {
+                return FindChild(parent.Nodes, node);
+            }
         }
 
-        XmlTreeNode FindNode(TreeNodeCollection nodes, XmlNode node)
+        XmlTreeNode FindChild(TreeNodeCollection nodes, XmlNode node)
         {
             foreach (XmlTreeNode xn in nodes)
             {
-                if (xn.Node == node) return xn;
-                if (xn.Nodes != null)
-                {
-                    XmlTreeNode child = FindNode(xn.Nodes, node);
-                    if (child != null) return child;
-                }
+                if (xn.Node == node) return xn;                
             }
+
             return null;
         }
 
@@ -525,7 +552,7 @@ namespace XmlNotepad
             // but when document is saved it may add nodes (like xml declaration) and so 
             // we check for this here and add corresponding nodes in the tree view when necessary.
             XmlNode node = e.Node;
-            if (null == FindNode(node) && !IsEditing && saving && node != null)
+            if (!IsEditing && saving && node != null && null == FindNode(node))
             {
                 if (e.ModelChangeType == ModelChangeType.NodeInserted)
                 {
@@ -701,6 +728,10 @@ namespace XmlNotepad
             this.nodeTextView.Invalidate();
         }
 
+        internal void OnLoaded()
+        {
+            this.nodeTextView.OnLoaded();
+        }
 
         public void Cut()
         {
@@ -1132,13 +1163,18 @@ namespace XmlNotepad
 
         private void OnSettingsChanged(object sender, string name)
         {
-
             // change the node colors.
-            System.Collections.Hashtable colors = (System.Collections.Hashtable)this.settings["Colors"];
+            var theme = (ColorTheme)this.settings["Theme"];
+            var colorSetName = theme == ColorTheme.Light ? "LightColors" : "DarkColors";
+            System.Collections.Hashtable colors = (System.Collections.Hashtable)this.settings[colorSetName];
             Color backColor = (Color)colors["Background"];
             this.BackColor = backColor;
             this.myTreeView.BackColor = backColor;
             this.nodeTextView.BackColor = backColor;
+
+            Color foreColor = (Color)colors["Text"];
+            this.myTreeView.ForeColor = foreColor;
+            this.nodeTextView.ForeColor = foreColor;
 
             this.Font = (Font)this.settings["Font"];
 
@@ -1439,91 +1475,110 @@ namespace XmlNotepad
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(XmlTreeView));
-            this.myTreeView = new TreeView();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(XmlTreeView));
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
-            this.nodeTextView = new XmlNotepad.NodeTextView();
-            this.resizer = new XmlNotepad.PaneResizer();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
-            this.hScrollBar1 = new HScrollBar();
+            this.hScrollBar1 = new System.Windows.Forms.HScrollBar();
+            this.resizer = new XmlNotepad.PaneResizer();
+            this.myTreeView = new XmlNotepad.TreeView();
+            this.nodeTextView = new XmlNotepad.NodeTextView();
             this.SuspendLayout();
-            // 
-            // myTreeView
-            // 
-            this.myTreeView.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.myTreeView.ImageList = this.imageList1;
-            this.myTreeView.LabelEdit = true;
-            this.myTreeView.Location = new System.Drawing.Point(0, 0);
-            this.myTreeView.Name = "TreeView";
-            this.myTreeView.AccessibleName = "TreeView";
-            //this.myTreeView.Scrollable = false;
-            this.myTreeView.Size = new System.Drawing.Size(216, 224);
-            this.myTreeView.TabIndex = 1;
             // 
             // imageList1
             // 
-            this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth24Bit;
-            this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
-            object imgStream = resources.GetObject("imageList1.ImageStream");
-            this.imageList1.ImageStream = (System.Windows.Forms.ImageListStreamer)imgStream;
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "Element.png");
+            this.imageList1.Images.SetKeyName(1, "RedBall.png");
+            this.imageList1.Images.SetKeyName(2, "BlueBall.png");
+            this.imageList1.Images.SetKeyName(3, "Text.png");
+            this.imageList1.Images.SetKeyName(4, "GreenBall.png");
+            this.imageList1.Images.SetKeyName(5, "PurpleBall.png");
+            this.imageList1.Images.SetKeyName(6, "Open.png");
+            this.imageList1.Images.SetKeyName(7, "cdata.png");
             // 
-            // nodeTextView
+            // vScrollBar1
             // 
-            this.nodeTextView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                | System.Windows.Forms.AnchorStyles.Left)
-                | System.Windows.Forms.AnchorStyles.Right)));
-            this.nodeTextView.BackColor = System.Drawing.Color.White;
-            this.nodeTextView.Location = new System.Drawing.Point(301, 0);
-            this.nodeTextView.Name = "nodeTextView";
-            this.nodeTextView.SelectedNode = null;
-            this.nodeTextView.Size = new System.Drawing.Size(179, 224);
-            this.nodeTextView.TabIndex = 4;
+            this.vScrollBar1.AccessibleName = "VScrollBar";
+            this.vScrollBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.vScrollBar1.Location = new System.Drawing.Point(477, 0);
+            this.vScrollBar1.Name = "vScrollBar1";
+            this.vScrollBar1.Size = new System.Drawing.Size(20, 224);
+            this.vScrollBar1.TabIndex = 0;
+            this.vScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.vScrollBar1_Scroll);
+            // 
+            // hScrollBar1
+            // 
+            this.hScrollBar1.AccessibleName = "HScrollBar";
+            this.hScrollBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.hScrollBar1.Location = new System.Drawing.Point(0, 204);
+            this.hScrollBar1.Name = "hScrollBar1";
+            this.hScrollBar1.Size = new System.Drawing.Size(179, 20);
+            this.hScrollBar1.TabIndex = 2;
+            this.hScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar1_Scroll);
             // 
             // resizer
             // 
+            this.resizer.AccessibleName = "XmlTreeResizer";
             this.resizer.Border3DStyle = System.Windows.Forms.Border3DStyle.Raised;
             this.resizer.Location = new System.Drawing.Point(200, 0);
-            this.resizer.Name = "XmlTreeResizer";
-            this.resizer.AccessibleName = "XmlTreeResizer";
+            this.resizer.Name = "resizer";
             this.resizer.Pane1 = this.myTreeView;
             this.resizer.Pane2 = this.nodeTextView;
             this.resizer.PaneWidth = 5;
             this.resizer.Size = new System.Drawing.Size(5, 408);
             this.resizer.TabIndex = 3;
             this.resizer.Vertical = true;
-            //
-            // hScrollBar1
-            //
-            this.hScrollBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                | System.Windows.Forms.AnchorStyles.Right)));
-            this.hScrollBar1.Location = new System.Drawing.Point(0, 207);
-            this.hScrollBar1.Name = "HScrollBar";
-            this.hScrollBar1.AccessibleName = "HScrollBar";
-            this.hScrollBar1.Size = new System.Drawing.Size(179, 17);
-            this.hScrollBar1.TabIndex = 2;
-            this.hScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.hScrollBar1_Scroll);
-
             // 
-            // vScrollBar1
+            // myTreeView
             // 
-            this.vScrollBar1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                | System.Windows.Forms.AnchorStyles.Right)));
-            this.vScrollBar1.Location = new System.Drawing.Point(480, 0);
-            this.vScrollBar1.Name = "VScrollBar";
-            this.vScrollBar1.AccessibleName = "VScrollBar";
-            this.vScrollBar1.Size = new System.Drawing.Size(17, 224);
-            this.vScrollBar1.TabIndex = 0;
-            this.vScrollBar1.Scroll += new System.Windows.Forms.ScrollEventHandler(this.vScrollBar1_Scroll);
+            this.myTreeView.AccessibleName = "TreeView";
+            this.myTreeView.AccessibleRole = System.Windows.Forms.AccessibleRole.List;
+            this.myTreeView.ImageList = this.imageList1;
+            this.myTreeView.LabelEdit = true;
+            this.myTreeView.LineColor = System.Drawing.SystemColors.ControlDark;
+            this.myTreeView.Location = new System.Drawing.Point(0, 0);
+            this.myTreeView.MouseDownEditDelay = 400;
+            this.myTreeView.Name = "myTreeView";
+            this.myTreeView.Nodes = null;
+            this.myTreeView.ScrollPosition = new System.Drawing.Point(0, 0);
+            this.myTreeView.SelectedNode = null;
+            this.myTreeView.Size = new System.Drawing.Size(216, 224);
+            this.myTreeView.TabIndex = 1;
+            this.myTreeView.TreeIndent = 30;
+            this.myTreeView.VirtualHeight = 0;
+            this.myTreeView.VirtualWidth = 0;
+            // 
+            // nodeTextView
+            // 
+            this.nodeTextView.AccessibleDescription = "Right hand side of the XmlTreeView for editing node values";
+            this.nodeTextView.AccessibleName = "NodeTextView";
+            this.nodeTextView.AccessibleRole = System.Windows.Forms.AccessibleRole.List;
+            this.nodeTextView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.nodeTextView.BackColor = System.Drawing.Color.White;
+            this.nodeTextView.Location = new System.Drawing.Point(301, 0);
+            this.nodeTextView.Name = "nodeTextView";
+            this.nodeTextView.Nodes = null;
+            this.nodeTextView.ScrollPosition = new System.Drawing.Point(0, 0);
+            this.nodeTextView.SelectedNode = null;
+            this.nodeTextView.Size = new System.Drawing.Size(179, 224);
+            this.nodeTextView.TabIndex = 4;
             // 
             // XmlTreeView
             // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.SystemColors.Window;
             this.Controls.Add(this.vScrollBar1);
             this.Controls.Add(this.hScrollBar1);
             this.Controls.Add(this.resizer);
             this.Controls.Add(this.nodeTextView);
             this.Controls.Add(this.myTreeView);
+            this.Name = "XmlTreeView";
             this.Size = new System.Drawing.Size(496, 224);
             this.ResumeLayout(false);
 
@@ -1786,7 +1841,9 @@ namespace XmlNotepad
 
         public Color GetForeColor(NodeImage img)
         {
-            System.Collections.Hashtable colors = (System.Collections.Hashtable)this.settings["Colors"];
+            var theme = (ColorTheme)this.settings["Theme"];
+            var colorSetName = theme == ColorTheme.Light ? "LightColors" : "DarkColors";
+            System.Collections.Hashtable colors = (System.Collections.Hashtable)this.settings[colorSetName];
             switch (img)
             {
                 case NodeImage.Element:

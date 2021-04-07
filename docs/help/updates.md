@@ -1,24 +1,18 @@
----
-layout: default
-title: Overview
-section: home
-permalink: /help/options
----
 
 ## Updates
 
-The Options Dialog can be used to configure how auto-update works in XML Notepad. The Options Dialog points to an [Updates.xml](http://www.lovettsoftware.com/downloads/xmlnotepad/Updates.xml) file that contains the following kind of information:
+The Options Dialog can be used to configure how auto-update works in XML Notepad. The Options Dialog points to an [Updates.xml](https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/Updates.xml) file that contains the following kind of information:
 
 ```xml
 <application>
     <title>Microsoft XML Notepad</title>
-    <location>http://www.lovettsoftware.com/downloads/xmlnotepad/Updates.xml</location>
-    <download>http://www.lovettsoftware.com/downloads/xmlnotepad/readme.htm</download>
+    <location>https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/Updates.xml</location>
+    <download>https://microsoft.github.io/XmlNotepad/#install/</download>
     <frequency>1.00:00:00</frequency>
   </application>
   <version number="2.8.0.9">
-    <bug>Fix locked file bug after doing xml comparison (github issue# 44).</bug>
-    <bug>Fix BOM option so it is honored on XSLT output files also (github issue# 46).</bug>
+    <bug>Fix locked file bug after doing xml comparison (GitHub issue# 44).</bug>
+    <bug>Fix BOM option so it is honored on XSLT output files also (GitHub issue# 46).</bug>
   </version>
   ...
 ```

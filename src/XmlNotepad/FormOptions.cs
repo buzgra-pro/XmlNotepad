@@ -4,6 +4,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 
 namespace XmlNotepad
 {
@@ -11,7 +12,7 @@ namespace XmlNotepad
 	/// Summary description for FormOptions.
 	/// </summary>
 	public class FormOptions : System.Windows.Forms.Form
-	{
+    {
         private Settings settings;
         UserSettings userSettings;
         
@@ -39,13 +40,24 @@ namespace XmlNotepad
             base.OnLoad(e);
         
             HelpProvider hp = this.Site.GetService(typeof(HelpProvider)) as HelpProvider;
-            if (hp != null) {
-                hp.SetHelpKeyword(this, "Options");
-                hp.SetHelpNavigator(this, HelpNavigator.KeywordIndex);
+            if (hp != null && Utilities.DynamicHelpEnabled)
+            {
+                hp.HelpNamespace = Utilities.OptionsHelp;
             }
 
             // now let the user resize it.
             this.AutoSize = false; 
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            HelpProvider hp = this.Site.GetService(typeof(HelpProvider)) as HelpProvider;
+            if (hp != null && Utilities.DynamicHelpEnabled)
+            {
+                hp.HelpNamespace = Utilities.DefaultHelp;
+            }
+
+            base.OnClosing(e);
         }
 
         protected override bool ProcessDialogKey(Keys keyData) {
@@ -117,6 +129,7 @@ namespace XmlNotepad
             // 
             this.AcceptButton = this.buttonOK;
             resources.ApplyResources(this, "$this");
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
             this.CancelButton = this.buttonCancel;
             this.Controls.Add(this.buttonReset);
@@ -142,7 +155,15 @@ namespace XmlNotepad
                 if (value != null) {
                     this.settings = value.GetService(typeof(Settings)) as Settings;
                     this.userSettings = value.GetService(typeof(UserSettings)) as UserSettings;
-                    this.propertyGrid1.SelectedObject = this.userSettings;
+
+                    string[] hiddenProperties = new string[0];
+                    if ((string)this.settings["AnalyticsClientId"] == "disabled")
+                    {
+                        hiddenProperties = new string[] { "AllowAnalytics" };
+                    }
+
+                    MemberFilter filter = new MemberFilter(this.userSettings, hiddenProperties);
+                    this.propertyGrid1.SelectedObject = filter;
                 }
             }
         }
@@ -159,16 +180,25 @@ namespace XmlNotepad
                 this.propertyGrid1.SelectedObject = userSettings;
             }
         }
+    }
 
-	}
+    public enum ColorTheme
+    {
+        Light,
+        Dark
+    }
 
     // This class keeps s a local snapshot of the settings until the user clicks the Ok button,
     // then the Apply() method is called to propagate the new settings to the underlying Settings object.
     // It also provides localizable strings for the property grid.
-    public class UserSettings {
+    public class UserSettings
+    {
         Settings settings;
         Font font;
         string fontName;
+        ColorTheme theme;
+        Hashtable lightColors;
+        Hashtable darkColors;
         Color elementColor;
         Color commentColor;
         Color attributeColor;
@@ -176,6 +206,8 @@ namespace XmlNotepad
         Color textColor;
         Color cdataColor;
         Color backgroundColor;
+        Color containerBackgroundColor;
+        Color editorBackgroundColor;
         string updateLocation;
         bool enableUpdate;
         bool noByteOrderMark;
@@ -185,21 +217,30 @@ namespace XmlNotepad
         string newLineChars;
         string language;
         int maximumLineLength;
+        int maximumValueLength;
         bool autoFormatLongLines;
+        bool ignoreDTD;
+        bool xmlDiffIgnoreChildOrder;
+        bool xmlDiffIgnoreComments;
+        bool xmlDiffIgnorePI;
+        bool xmlDiffIgnoreWhitespace;
+        bool xmlDiffIgnoreNamespaces;
+        bool xmlDiffIgnorePrefixes;
+        bool xmlDiffIgnoreXmlDecl;
+        bool xmlDiffIgnoreDtd;
+        bool allowAnalytics;
+
+        public static string DefaultUpdateLocation = "https://lovettsoftwarestorage.blob.core.windows.net/downloads/XmlNotepad/Updates.xml";
 
         public UserSettings(Settings s) {            
             this.settings = s;
 
             this.font = (Font)this.settings["Font"];
             this.fontName = font.Name + " " + font.SizeInPoints + " " + font.Style.ToString();
-            Hashtable colors = (Hashtable)this.settings["Colors"];
-            elementColor = (Color)colors["Element"];
-            commentColor = (Color)colors["Comment"];
-            attributeColor = (Color)colors["Attribute"];
-            piColor = (Color)colors["PI"];
-            textColor = (Color)colors["Text"];
-            cdataColor = (Color)colors["CDATA"];
-            backgroundColor = (Color)colors["Background"];
+            this.theme = (ColorTheme)this.settings["Theme"];
+            lightColors = (Hashtable)this.settings["LightColors"];
+            darkColors = (Hashtable)this.settings["DarkColors"];
+            LoadColors();
             updateLocation = (string)this.settings["UpdateLocation"];
             enableUpdate = (bool)this.settings["UpdateEnabled"];
             autoFormatOnSave = (bool)this.settings["AutoFormatOnSave"];
@@ -210,6 +251,97 @@ namespace XmlNotepad
             language = (string)this.settings["Language"];
             maximumLineLength = (int)this.settings["MaximumLineLength"];
             autoFormatLongLines = (bool)this.settings["AutoFormatLongLines"];
+            ignoreDTD = (bool)this.settings["IgnoreDTD"];
+
+            this.xmlDiffIgnoreChildOrder = (bool)this.settings["XmlDiffIgnoreChildOrder"];
+            this.xmlDiffIgnoreComments = (bool)this.settings["XmlDiffIgnoreComments"];
+            this.xmlDiffIgnorePI = (bool)this.settings["XmlDiffIgnorePI"];
+            this.xmlDiffIgnoreWhitespace = (bool)this.settings["XmlDiffIgnoreWhitespace"];
+            this.xmlDiffIgnoreNamespaces = (bool)this.settings["XmlDiffIgnoreNamespaces"];
+            this.xmlDiffIgnorePrefixes = (bool)this.settings["XmlDiffIgnorePrefixes"];
+            this.xmlDiffIgnoreXmlDecl = (bool)this.settings["XmlDiffIgnoreXmlDecl"];
+            this.xmlDiffIgnoreDtd = (bool)this.settings["XmlDiffIgnoreDtd"];
+            this.allowAnalytics = (bool)this.settings["AllowAnalytics"];
+        }
+
+        private void LoadColors()
+        {
+            Hashtable colors = this.theme == ColorTheme.Light ? lightColors : darkColors;
+            elementColor = (Color)colors["Element"];
+            commentColor = (Color)colors["Comment"];
+            attributeColor = (Color)colors["Attribute"];
+            piColor = (Color)colors["PI"];
+            textColor = (Color)colors["Text"];
+            cdataColor = (Color)colors["CDATA"];
+            backgroundColor = (Color)colors["Background"];
+            containerBackgroundColor = (Color)colors["ContainerBackground"];
+            editorBackgroundColor = (Color)colors["EditorBackground"];
+        }
+
+        internal static Hashtable GetDefaultColors(ColorTheme theme)
+        {
+            if (theme == ColorTheme.Light)
+            {
+                System.Collections.Hashtable light = new System.Collections.Hashtable();
+                light["Element"] = Color.FromArgb(0, 64, 128);
+                light["Attribute"] = Color.Maroon;
+                light["Text"] = Color.Black;
+                light["Comment"] = Color.Green;
+                light["PI"] = Color.Purple;
+                light["CDATA"] = Color.Gray;
+                light["Background"] = Color.White;
+                light["ContainerBackground"] = Color.AliceBlue;
+                light["EditorBackground"] = Color.LightSteelBlue;
+                return light;
+            }
+            else
+            {
+                System.Collections.Hashtable dark = new System.Collections.Hashtable();
+                dark["Element"] = Color.FromArgb(0x35, 0x7D, 0xCE);
+                dark["Attribute"] = Color.FromArgb(0x92, 0xCA, 0xF3);
+                dark["Text"] = Color.FromArgb(0x94, 0xB7, 0xC8);
+                dark["Comment"] = Color.FromArgb(0x45, 0x62, 0x23);
+                dark["PI"] = Color.FromArgb(0xAC, 0x91, 0x6A);
+                dark["CDATA"] = Color.FromArgb(0xC2, 0xCB, 0x85);
+                dark["Background"] = Color.FromArgb(0x1e, 0x1e, 0x1e);
+                dark["ContainerBackground"] = Color.FromArgb(0x25, 0x25, 0x26);
+                dark["EditorBackground"] = Color.FromArgb(24, 24, 44);
+                return dark;
+            }
+        }
+
+        internal static void AddDefaultColors(Settings settings, string name, ColorTheme theme)
+        {
+            Hashtable table = (Hashtable)settings[name];
+            if (table == null)
+            {
+                table = new Hashtable();
+                settings[name] = table;
+            }
+
+            Hashtable defaults = GetDefaultColors(theme);
+            // Merge any undefined colors.
+            foreach (string key in defaults.Keys)
+            {
+                if (!table.ContainsKey(key))
+                {
+                    table.Add(key, defaults[key]);
+                }
+            }
+        }
+
+        internal void SaveColors()
+        {
+            Hashtable colors = this.theme == ColorTheme.Light ? this.lightColors : this.darkColors;
+            colors["Element"] = this.elementColor;
+            colors["Comment"] = this.commentColor;
+            colors["CDATA"] = this.cdataColor;
+            colors["Attribute"] = this.attributeColor;
+            colors["PI"] = this.piColor;
+            colors["Text"] = this.textColor;
+            colors["Background"] = this.backgroundColor;
+            colors["ContainerBackground"] = this.containerBackgroundColor;
+            colors["EditorBackground"] = this.editorBackgroundColor;
         }
 
         public static string Escape(string nl) {
@@ -222,15 +354,12 @@ namespace XmlNotepad
         public void Apply() {
             this.settings["Font"] = this.font;
 
-            Hashtable colors = (Hashtable)this.settings["Colors"];
-            colors["Element"] = this.elementColor;
-            colors["Comment"] = this.commentColor;
-            colors["CDATA"] = this.cdataColor;
-            colors["Attribute"] = this.attributeColor;
-            colors["PI"] = this.piColor;
-            colors["Text"] = this.textColor;
-            colors["Background"] = this.backgroundColor;
+            this.settings["Theme"] = this.theme;
             
+            SaveColors();
+            this.settings["LightColors"] = this.lightColors;
+            this.settings["DarkColors"] = this.darkColors;
+
             this.settings["UpdateEnabled"] = this.enableUpdate;
             this.settings["UpdateLocation"] = this.updateLocation;
 
@@ -242,7 +371,20 @@ namespace XmlNotepad
 
             this.settings["Language"] = ("" + this.language).Trim();
             this.settings["MaximumLineLength"] = this.maximumLineLength;
+            this.settings["MaximumValueLength"] = this.maximumValueLength;
             this.settings["AutoFormatLongLines"] = this.autoFormatLongLines;
+            this.settings["IgnoreDTD"] = this.ignoreDTD;
+
+            this.settings["XmlDiffIgnoreChildOrder"] = this.xmlDiffIgnoreChildOrder;
+            this.settings["XmlDiffIgnoreComments"] = this.xmlDiffIgnoreComments;
+            this.settings["XmlDiffIgnorePI"] = this.xmlDiffIgnorePI;
+            this.settings["XmlDiffIgnoreWhitespace"] = this.xmlDiffIgnoreWhitespace;
+            this.settings["XmlDiffIgnoreNamespaces"] = this.xmlDiffIgnoreNamespaces;
+            this.settings["XmlDiffIgnorePrefixes"] = this.xmlDiffIgnorePrefixes;
+            this.settings["XmlDiffIgnoreXmlDecl"] = this.xmlDiffIgnoreXmlDecl;
+            this.settings["XmlDiffIgnoreDtd"] = this.xmlDiffIgnoreDtd;
+
+            this.settings["AllowAnalytics"] = this.allowAnalytics;
 
             this.settings.OnChanged("Colors");
 
@@ -250,14 +392,12 @@ namespace XmlNotepad
 
         public void Reset() {
             this.font = new Font("Courier New", 10, FontStyle.Regular);
-            elementColor = Color.FromArgb(0, 64, 128); 
-            commentColor = Color.Green;
-            attributeColor = Color.Maroon;
-            piColor = Color.Purple;
-            textColor = Color.Black;
-            cdataColor = Color.Gray;
-            backgroundColor = Color.White;
-            updateLocation = "http://www.lovettsoftware.com/downloads/xmlnotepad/Updates.xml";
+
+            this.theme = ColorTheme.Light;
+            this.lightColors = GetDefaultColors(ColorTheme.Light);
+            this.darkColors = GetDefaultColors(ColorTheme.Dark);
+            this.LoadColors();
+            updateLocation = DefaultUpdateLocation;
             enableUpdate = true;
             autoFormatOnSave = true;
             noByteOrderMark = false;
@@ -266,6 +406,29 @@ namespace XmlNotepad
             newLineChars = Escape("\r\n");
             language = "";
             this.maximumLineLength = 10000;
+            this.maximumValueLength = short.MaxValue;
+            ignoreDTD = false;
+            this.allowAnalytics = false;
+        }
+
+        [SRCategoryAttribute("ThemeCategory")]
+        [LocDisplayName("Theme")]
+        [SRDescriptionAttribute("ThemeDescription")]
+        public ColorTheme Theme
+        {
+            get
+            {
+                return this.theme;
+            }
+            set
+            {
+                if (this.theme != value)
+                {
+                    SaveColors();
+                    this.theme = value;
+                    LoadColors();
+                }
+            }
         }
 
         [SRCategoryAttribute("ColorCategory")]
@@ -348,6 +511,37 @@ namespace XmlNotepad
             }
         }
 
+        [SRCategoryAttribute("ColorCategory")]
+        [LocDisplayName("ContainerBackgroundColor")]
+        [SRDescriptionAttribute("ContainerBackgroundColorDescription")]
+        public Color ContainerBackgroundColor
+        {
+            get
+            {
+                return this.containerBackgroundColor;
+            }
+            set
+            {
+                this.containerBackgroundColor = value;
+            }
+        }
+
+        [SRCategoryAttribute("ColorCategory")]
+        [LocDisplayName("EditorBackgroundColor")]
+        [SRDescriptionAttribute("EditorBackgroundColorDescription")]
+        public Color EditorBackgroundColor
+        {
+            get
+            {
+                return this.editorBackgroundColor;
+            }
+            set
+            {
+                this.editorBackgroundColor = value;
+            }
+        }
+
+
         [SRCategoryAttribute("FontCategory")]
         [LocDisplayName("FontPropertyName")]
         [SRDescriptionAttribute("FontDescription")]
@@ -375,6 +569,21 @@ namespace XmlNotepad
             }
         }
 
+        [SRCategoryAttribute("AnalyticsCategory")]
+        [LocDisplayName("AllowAnalytics")]
+        [SRDescriptionAttribute("AllowAnalyticsDescription")]
+        public bool AllowAnalytics
+        {
+            get
+            {
+                return this.allowAnalytics;
+            }
+            set
+            {
+                this.allowAnalytics = value;
+            }
+        }
+
         [SRCategoryAttribute("UpdateCategory")]
         [LocDisplayName("EnableUpdate")]
         [SRDescriptionAttribute("EnableUpdateDescription")]
@@ -386,6 +595,7 @@ namespace XmlNotepad
                 this.enableUpdate = value;
             }
         }
+
         [SRCategoryAttribute("UpdateCategory")]
         [LocDisplayName("UpdateLocation")]
         [SRDescriptionAttribute("UpdateLocationDescription")]
@@ -475,6 +685,21 @@ namespace XmlNotepad
         }
 
         [SRCategoryAttribute("LongLineCategory")]
+        [LocDisplayName("MaximumValueLengthProperty")]
+        [SRDescriptionAttribute("MaximumValueLengthDescription")]
+        public int MaximumValueLength
+        {
+            get
+            {
+                return this.maximumValueLength;
+            }
+            set
+            {
+                this.maximumValueLength = value;
+            }
+        }
+
+        [SRCategoryAttribute("LongLineCategory")]
         [LocDisplayName("AutoFormatLongLinesProperty")]
         [SRDescriptionAttribute("AutoFormatLongLinesDescription")]
         public bool AutoFormatLongLines
@@ -487,6 +712,191 @@ namespace XmlNotepad
             {
                 this.autoFormatLongLines = value;
             }
+        }
+
+        [SRCategoryAttribute("Validation")]
+        [LocDisplayName("IgnoreDTDProperty")]
+        [SRDescriptionAttribute("IgnoreDTDDescription")]
+        public bool IgnoreDTD
+        {
+            get
+            {
+                return this.ignoreDTD;
+            }
+            set
+            {
+                this.ignoreDTD = value;
+            }
+        }
+
+
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnoreChildOrderProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnoreChildOrderDescription")]
+        public bool XmlDiffIgnoreChildOrder
+        {
+            get
+            {
+                return this.xmlDiffIgnoreChildOrder;
+            }
+            set
+            {
+                this.xmlDiffIgnoreChildOrder = value;
+            }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnoreCommentsProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnoreCommentsDescription")]
+        public bool XmlDiffIgnoreComments
+        {
+            get { return this.xmlDiffIgnoreComments; }
+            set { this.xmlDiffIgnoreComments = value; }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnorePIProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnorePIDescription")]
+        public bool XmlDiffIgnorePI
+        {
+            get { return this.xmlDiffIgnorePI; }
+            set { this.xmlDiffIgnorePI = value; }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnoreWhitespaceProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnoreWhitespaceDescription")]
+        public bool XmlDiffIgnoreWhitespace
+        {
+            get { return this.xmlDiffIgnoreWhitespace; }
+            set { this.xmlDiffIgnoreWhitespace = value; }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnoreNamespacesProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnoreNamespacesDescription")]
+        public bool XmlDiffIgnoreNamespaces
+        {
+            get { return this.xmlDiffIgnoreNamespaces; }
+            set { this.xmlDiffIgnoreNamespaces = value; }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnorePrefixesProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnorePrefixesDescription")]
+        public bool XmlDiffIgnorePrefixes
+        {
+            get { return this.xmlDiffIgnorePrefixes; }
+            set { this.xmlDiffIgnorePrefixes = value; }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnoreXmlDeclProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnoreXmlDeclDescription")]
+        public bool XmlDiffIgnoreXmlDecl
+        {
+            get { return this.xmlDiffIgnoreXmlDecl; }
+            set { this.xmlDiffIgnoreXmlDecl = value; }
+        }
+        [SRCategoryAttribute("XmlDiff")]
+        [LocDisplayName("XmlDiffIgnoreDtdProperty")]
+        [SRDescriptionAttribute("XmlDiffIgnoreDtdDescription")]
+        public bool XmlDiffIgnoreDtd
+        {
+            get { return this.xmlDiffIgnoreDtd; }
+            set { this.xmlDiffIgnoreDtd = value; }
+        }
+
+    }
+
+    public sealed class MemberFilter : ICustomTypeDescriptor
+    {
+        private readonly HashSet<string> hidden = new HashSet<string>();
+        private readonly object component;
+
+        public MemberFilter(object component, params string[] memberNamesToHide)
+        {
+            this.component = component;
+            hidden = new HashSet<string>(memberNamesToHide);
+        }
+
+        AttributeCollection ICustomTypeDescriptor.GetAttributes()
+        {
+            return TypeDescriptor.GetAttributes(component);
+        }
+
+        string ICustomTypeDescriptor.GetClassName()
+        {
+            return TypeDescriptor.GetClassName(component);
+        }
+
+        string ICustomTypeDescriptor.GetComponentName()
+        {
+            return TypeDescriptor.GetComponentName(component);
+        }
+
+        TypeConverter ICustomTypeDescriptor.GetConverter()
+        {
+            return TypeDescriptor.GetConverter(component);
+        }
+
+        EventDescriptor ICustomTypeDescriptor.GetDefaultEvent()
+        {
+            EventDescriptor result = TypeDescriptor.GetDefaultEvent(component);
+            return (result == null || hidden.Contains(result.Name)) ? null : result;
+
+        }
+
+        PropertyDescriptor ICustomTypeDescriptor.GetDefaultProperty()
+        {
+            PropertyDescriptor result = TypeDescriptor.GetDefaultProperty(component);
+            return (result == null || hidden.Contains(result.Name)) ? null : result;
+        }
+
+        object ICustomTypeDescriptor.GetEditor(Type editorBaseType)
+        {
+            return TypeDescriptor.GetEditor(component, editorBaseType);
+        }
+
+        EventDescriptorCollection
+        ICustomTypeDescriptor.GetEvents(Attribute[] attributes)
+        {
+            return GetEvents(); // don't filter on attribute; we're calling the shots...
+}
+        EventDescriptorCollection ICustomTypeDescriptor.GetEvents()
+        {
+            return GetEvents();
+        }
+        private EventDescriptorCollection GetEvents()
+        {
+            EventDescriptorCollection master = TypeDescriptor.GetEvents(component);
+            var list = new List<EventDescriptor>(master.Count);
+            foreach (EventDescriptor evt in master)
+            {
+                if (!hidden.Contains(evt.Name)) 
+                    list.Add(evt);
+            }
+            return new EventDescriptorCollection(list.ToArray());
+        }
+
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties(Attribute[] attributes)
+        {
+            return GetProperties(); // don't filter on attribute; we're calling the shots...
+        }
+
+        PropertyDescriptorCollection ICustomTypeDescriptor.GetProperties()
+        {
+            return GetProperties();
+        }
+        private PropertyDescriptorCollection GetProperties()
+        {
+            PropertyDescriptorCollection master = TypeDescriptor.GetProperties(component);
+            var list = new List<PropertyDescriptor>(master.Count);
+            foreach (PropertyDescriptor prop in master)
+            {
+                if (!hidden.Contains(prop.Name)) 
+                    list.Add(prop);
+            }
+            return new PropertyDescriptorCollection(list.ToArray());
+        }
+
+        public object GetPropertyOwner(PropertyDescriptor pd)
+        {
+            return component;
         }
     }
 }

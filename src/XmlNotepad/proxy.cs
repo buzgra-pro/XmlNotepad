@@ -17,18 +17,20 @@ namespace XmlNotepad {
 
         public XmlProxyResolver(IServiceProvider site) {
             ps = site.GetService(typeof(WebProxyService)) as WebProxyService;
+            Proxy = HttpWebRequest.DefaultWebProxy;
         }
 
         public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn) {
             if (absoluteUri == null) {
                 throw new ArgumentNullException("absoluteUri");
             }
-            if (absoluteUri.Scheme == "http" && (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream))) {
+            if ((absoluteUri.Scheme == "http" || absoluteUri.Scheme == "https" )
+                && (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream))) {
                 try {
                     return GetResponse(absoluteUri);
                 } catch (Exception e) {
                     if (WebProxyService.ProxyAuthenticationRequired(e)) {
-                        WebProxyState state = ps.PrepareWebProxy(this.Proxy, absoluteUri.AbsoluteUri, WebProxyState.DefaultCredentials, true);
+                        WebProxyState state = ps.PrepareWebProxy(this.GetProxy(), absoluteUri.AbsoluteUri, WebProxyState.DefaultCredentials, true);
                         if (state != WebProxyState.Abort) {
                             // try again...
                             return GetResponse(absoluteUri);
@@ -46,13 +48,13 @@ namespace XmlNotepad {
             WebRequest webReq = WebRequest.Create(uri);
             webReq.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.Default);
             webReq.Credentials = CredentialCache.DefaultCredentials;
-            webReq.Proxy = this.Proxy;
+            webReq.Proxy = this.GetProxy();
             WebResponse resp = webReq.GetResponse();
             return resp.GetResponseStream();
         }
 
-        IWebProxy Proxy {
-            get { return HttpWebRequest.DefaultWebProxy; }
+        IWebProxy GetProxy() {
+            return HttpWebRequest.DefaultWebProxy; 
         }
     }
 

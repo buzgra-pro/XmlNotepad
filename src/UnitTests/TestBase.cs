@@ -63,8 +63,10 @@ namespace UnitTests {
 
         public Window LaunchApp(string exeFileName, string args, string rootElementName) {
             ProcessStartInfo info = new ProcessStartInfo();
-            info.FileName = exeFileName;
+            info.FileName = "\"" + exeFileName + "\"";
             info.Arguments = args;
+            info.EnvironmentVariables.Add("XML_NOTEPAD_DISABLE_HIGH_DPI", "1");
+            info.UseShellExecute = false;
 
             Process p = new Process();
             p.StartInfo = info;
